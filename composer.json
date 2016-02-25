@@ -1,0 +1,23 @@
+{
+    "name": "ivopetkov/image-gallery-bearframework-addon",
+    "description": "Image gallery addon for Bear Framework",
+    "keywords": ["gallery", "responsive", "image", "addon", "Bear Framework"],
+    "homepage": "https://github.com/ivopetkov/image-gallery-bearframework-addon",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ivo Petkov",
+            "email": "ivo@ivopetkov.com",
+            "homepage": "http://ivopetkov.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.5.0",
+        "bearframework/bearframework": "*",
+        "ivopetkov/lazy-image-bearframework-addon": "*",
+        "ivopetkov/js-lightbox-bearframework-addon": "*"
+    },
+    "autoload": {
+        "files": ["autoload.php"]
+    }
+}
