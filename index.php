@@ -7,4 +7,4 @@
  * Free to use under the MIT license.
  */
 
-$app->components->addAlias('image-gallery', 'file:' . $context->dir . 'components/imageGallery.php');
+$app->components->addAlias('image-gallery', 'file:' . $context->dir . '/components/imageGallery.php');
