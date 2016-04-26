@@ -13,10 +13,10 @@
     ],
     "require": {
         "php": ">=5.5.0",
-        "bearframework/bearframework": "*",
-        "ivopetkov/html-server-components-bearframework-addon": "*",
-        "ivopetkov/lazy-image-bearframework-addon": "dev-master",
-        "ivopetkov/js-lightbox-bearframework-addon": "dev-master",
+        "bearframework/bearframework": "0.8.*",
+        "ivopetkov/html-server-components-bearframework-addon": "0.2.*",
+        "ivopetkov/lazy-image-bearframework-addon": "0.0.*",
+        "ivopetkov/js-lightbox-bearframework-addon": "0.0.*",
         "ivopetkov/html5-dom-document-php": "0.2.*"
     },
     "autoload": {
