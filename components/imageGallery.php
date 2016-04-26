@@ -66,7 +66,7 @@ if ($onClick === 'fullscreen') {
             'html' => $imageHTML,
             'width' => $size[0],
             'height' => $size[1],
-            'onBeforeFocus' => 'htmlMagic.insert(' . json_encode($imageDomDocument->saveHTML()) . ');',
+            'onBeforeFocus' => 'html5DOMDocument.insert(' . json_encode($imageDomDocument->saveHTML()) . ');',
             'onShow' => 'responsivelyLazy.run();'
         ];
     }
@@ -116,11 +116,11 @@ $containerAttributes .= ' id="' . htmlentities($containerID) . '"';
 $containerAttributes .= ' style="' . htmlentities($containerStyle) . '"';
 ?><html>
     <head>
-        <script src="http://all.projects/html-magic-js/HTMLMagic.js?<?= time() ?>"></script>
+        <script src="<?= htmlentities($context->assets->getUrl('assets/HTML5DOMDocument.js')) ?>"></script>
         <style><?= $containerStyle ?></style>
     </head>
     <body>
-        <script src="http://all.projects/responsive-attributes/responsiveAttributes.js?<?= time() ?>"></script>
+        <script src="<?= htmlentities($context->assets->getUrl('assets/responsiveAttributes.js')) ?>"></script>
         <?php
         if ($onClick === 'fullscreen') {
             ?><component src="js-lightbox" onload="<?= htmlentities('window.' . $containerID . 'lb = new ivoPetkov.bearFramework.addons.jsLightbox(' . json_encode($lightboxImages) . ');') ?>"/><?php

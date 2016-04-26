@@ -16,7 +16,8 @@
         "bearframework/bearframework": "*",
         "ivopetkov/html-server-components-bearframework-addon": "*",
         "ivopetkov/lazy-image-bearframework-addon": "*",
-        "ivopetkov/js-lightbox-bearframework-addon": "*"
+        "ivopetkov/js-lightbox-bearframework-addon": "*",
+        "ivopetkov/html5-dom-document-php": "0.2.*"
     },
     "autoload": {
         "files": ["autoload.php"]
