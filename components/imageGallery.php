@@ -11,41 +11,44 @@ $domDocument->loadHTML($component->innerHTML);
 $files = $domDocument->querySelectorAll('file');
 
 $onClick = 'fullscreen';
-if (strlen($component->onClick) > 0) {
-    if (array_search($component->onClick, ['fullscreen', 'url', 'custom', 'none']) !== false) {
-        $onClick = $component->onClick;
+$temp = (string) $component->onClick;
+if ($temp !== '') {
+    if (array_search($temp, ['fullscreen', 'url', 'custom', 'none']) !== false) {
+        $onClick = $temp;
     }
 }
 
 $imageAspectRatio = null;
-if (strlen($component->imageAspectRatio) > 0) {
-    if (preg_match('/^[0-9\.]+:[0-9\.]+$/', $component->imageAspectRatio) === 1) {
-        $imageAspectRatio = $component->imageAspectRatio;
+$temp = (string) $component->imageAspectRatio;
+if ($temp !== '') {
+    if (preg_match('/^[0-9\.]+:[0-9\.]+$/', $temp) === 1) {
+        $imageAspectRatio = $temp;
     }
 }
 
 $columnsCount = 'auto';
-if (strlen($component->columnsCount) > 0) {
-    if (is_numeric($component->columnsCount)) {
-        $columnsCount = (int) $component->columnsCount;
-        if ($columnsCount < 1 || $columnsCount > 20) {
-            $columnsCount = 'auto';
+$temp = (string) $component->columnsCount;
+if ($temp !== '') {
+    if (is_numeric($temp)) {
+        $temp = (int) $temp;
+        if ($temp >= 1 && $temp <= 20) {
+            $columnsCount = $temp;
         }
     }
 }
 
 $imageSize = 'medium';
-if ($columnsCount === 'auto') {
-    if (strlen($component->imageSize) > 0) {
-        if (array_search($component->imageSize, ['tiny', 'small', 'medium', 'large', 'huge']) !== false) {
-            $imageSize = $component->imageSize;
-        }
+$temp = (string) $component->imageSize;
+if ($temp !== '') {
+    if (array_search($temp, ['tiny', 'small', 'medium', 'large', 'huge']) !== false) {
+        $imageSize = $temp;
     }
 }
 
 $spacing = '0px';
-if (strlen($component->spacing) > 0) {
-    $spacing = $component->spacing;
+$temp = (string) $component->spacing;
+if ($temp !== '') {
+    $spacing = $temp;
 }
 
 $containerID = 'imggallery' . uniqid();
@@ -116,11 +119,11 @@ $containerAttributes .= ' id="' . htmlentities($containerID) . '"';
 $containerAttributes .= ' style="' . htmlentities($containerStyle) . '"';
 ?><html>
     <head>
-        <script src="<?= htmlentities($context->assets->getUrl('assets/HTML5DOMDocument.js')) ?>"></script>
+        <script id="image-gallery-bearframework-addon-script-1" src="<?= htmlentities($context->assets->getUrl('assets/HTML5DOMDocument.js')) ?>"></script>
         <style><?= $containerStyle ?></style>
     </head>
     <body>
-        <script src="<?= htmlentities($context->assets->getUrl('assets/responsiveAttributes.js')) ?>"></script>
+        <script id="image-gallery-bearframework-addon-script-2" src="<?= htmlentities($context->assets->getUrl('assets/responsiveAttributes.js')) ?>"></script>
         <?php
         if ($onClick === 'fullscreen') {
             ?><component src="js-lightbox" onload="<?= htmlentities('window.' . $containerID . 'lb = new ivoPetkov.bearFramework.addons.jsLightbox(' . json_encode($lightboxImages) . ');') ?>"/><?php
@@ -129,10 +132,12 @@ $containerAttributes .= ' style="' . htmlentities($containerStyle) . '"';
     <div<?= $containerAttributes ?>>
         <?php
         foreach ($files as $index => $file) {
-            $title = (string) $file->getAttribute('title');
-            $titleAttribute = isset($title{0}) ? ' title="' . htmlentities($title) . '"' : '';
             $class = (string) $file->getAttribute('class');
             $classAttribute = isset($class{0}) ? ' class="' . htmlentities($class) . '"' : '';
+            $alt = (string) $file->getAttribute('alt');
+            $altAttribute = isset($alt{0}) ? ' alt="' . htmlentities($alt) . '"' : '';
+            $title = (string) $file->getAttribute('title');
+            $titleAttribute = isset($title{0}) ? ' title="' . htmlentities($title) . '"' : '';
             echo '<div>';
             if ($onClick === 'fullscreen') {
                 echo '<a' . $titleAttribute . ' onclick="window.' . $containerID . 'lb.open(' . $index . ');" style="cursor:pointer;">';
@@ -144,7 +149,7 @@ $containerAttributes .= ' style="' . htmlentities($containerStyle) . '"';
                 echo '<a' . $titleAttribute . ' onclick="' . htmlentities(isset($onClick{0})) . '" style="cursor:pointer;">';
             }
             $filename = (string) $file->getAttribute('filename');
-            echo '<component src="lazy-image" responsively-lazy-overflown="true"' . $titleAttribute . $classAttribute . ' filename="' . htmlentities($filename) . '"' . $imageAttributes . '/>';
+            echo '<component src="lazy-image"' . $classAttribute . $altAttribute . $titleAttribute . ' filename="' . htmlentities($filename) . '"' . $imageAttributes . '/>';
             if ($onClick === 'fullscreen' || $onClick === 'url' || $onClick === 'custom') {
                 echo '</a>';
             }
