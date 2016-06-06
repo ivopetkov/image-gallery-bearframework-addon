@@ -1,7 +1,7 @@
 {
     "name": "ivopetkov/image-gallery-bearframework-addon",
     "description": "Image gallery addon for Bear Framework",
-    "keywords": ["gallery", "responsive", "image", "addon", "Bear Framework"],
+    "keywords": ["gallery", "responsive image", "Bear Framework addon"],
     "homepage": "https://github.com/ivopetkov/image-gallery-bearframework-addon",
     "license": "MIT",
     "authors": [
