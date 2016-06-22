@@ -119,11 +119,11 @@ $containerAttributes .= ' id="' . htmlentities($containerID) . '"';
 $containerAttributes .= ' style="' . htmlentities($containerStyle) . '"';
 ?><html>
     <head>
-        <script id="image-gallery-bearframework-addon-script-1" src="<?= htmlentities($context->assets->getUrl('assets/HTML5DOMDocument.js')) ?>"></script>
+        <script id="image-gallery-bearframework-addon-script-1" src="<?= htmlentities($context->assets->getUrl('assets/HTML5DOMDocument.min.js')) ?>"></script>
         <style><?= $containerStyle ?></style>
     </head>
     <body>
-        <script id="image-gallery-bearframework-addon-script-2" src="<?= htmlentities($context->assets->getUrl('assets/responsiveAttributes.js')) ?>"></script>
+        <script id="image-gallery-bearframework-addon-script-2" src="<?= htmlentities($context->assets->getUrl('assets/responsiveAttributes.min.js')) ?>"></script>
         <?php
         if ($onClick === 'fullscreen') {
             ?><component src="js-lightbox" onload="<?= htmlentities('window.' . $containerID . 'lb = new ivoPetkov.bearFramework.addons.jsLightbox(' . json_encode($lightboxImages) . ');') ?>"/><?php
