@@ -116,7 +116,11 @@ if ($imageAspectRatio !== null) {
 }
 
 $containerAttributes .= ' id="' . htmlentities($containerID) . '"';
-$containerAttributes .= ' style="' . htmlentities($containerStyle) . '"';
+
+$class = (string) $component->class;
+if (isset($class{0})) {
+    $containerAttributes .= ' class="' . htmlentities($class) . '"';
+}
 ?><html>
     <head>
         <script id="image-gallery-bearframework-addon-script-1" src="<?= htmlentities($context->assets->getUrl('assets/HTML5DOMDocument.min.js')) ?>"></script>
