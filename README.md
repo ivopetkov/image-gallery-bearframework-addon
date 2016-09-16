@@ -60,6 +60,10 @@ $app->addons->add('ivopetkov/image-gallery-bearframework-addon');
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The size of the images, if columnsCount is not specified. Available values: tiny, small, medium, large, huge
 
+`imageLoadingBackground`
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The type of background shown while the image is loading. Available values: none and checkered.
+
 `spacing`
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The spacing between the images. Example values: 10px, 1rem, etc.
