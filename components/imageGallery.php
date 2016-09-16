@@ -55,23 +55,31 @@ $containerID = 'imggallery' . uniqid();
 $containerAttributes = '';
 
 if ($onClick === 'fullscreen') {
-    $lightboxImages = [];
+    $jsData = [
+        'containerID' => $containerID,
+        'lightboxData' => [
+            'images' => []
+        ],
+        'images' => []
+    ];
+    $index = 0;
     foreach ($files as $file) {
         $filename = $file->getAttribute('filename');
-        $size = $app->images->getSize($filename);
-        $html = $app->components->process('<component style="background-color:#000;" src="lazy-image" filename="' . $filename . '"/>');
+        $imageContainerID = $containerID . 'img' . $index;
+        $html = $app->components->process('<div id="' . $imageContainerID . '"><component style="background-color:#000;" src="lazy-image" filename="' . $filename . '"/></div>');
         $imageDomDocument = new IvoPetkov\HTML5DOMDocument();
         $imageDomDocument->loadHTML($html);
         $imageHTMLBody = $imageDomDocument->querySelector('body');
         $imageHTML = $imageHTMLBody->innerHTML;
         $imageHTMLBody->parentNode->removeChild($imageHTMLBody);
-        $lightboxImages[] = [
+        $jsData['lightboxData']['images'][] = [
             'html' => $imageHTML,
-            'width' => $size[0],
-            'height' => $size[1],
-            'onBeforeFocus' => 'html5DOMDocument.insert(' . json_encode($imageDomDocument->saveHTML()) . ');',
-            'onShow' => 'responsivelyLazy.run();'
+            'onBeforeShow' => 'window.' . $containerID . 'ig.onBeforeShow(' . $index . ');',
+            'onShow' => 'window.' . $containerID . 'ig.onShow(' . $index . ');',
         ];
+        list($imageWidth, $imageHeight) = $app->images->getSize($filename);
+        $jsData['images'][] = [$imageWidth, $imageHeight, $imageDomDocument->saveHTML()];
+        $index++;
     }
 }
 
@@ -124,13 +132,18 @@ if (isset($class{0})) {
 ?><html>
     <head>
         <script id="image-gallery-bearframework-addon-script-1" src="<?= htmlentities($context->assets->getUrl('assets/HTML5DOMDocument.min.js')) ?>"></script>
+        <?php
+        if ($onClick === 'fullscreen') {
+            ?><script id="image-gallery-bearframework-addon-script-2" src="<?= htmlentities($context->assets->getUrl('assets/imageGallery.min.js')) ?>"></script><?php
+        }
+        ?>
         <style><?= $containerStyle ?></style>
     </head>
     <body>
-        <script id="image-gallery-bearframework-addon-script-2" src="<?= htmlentities($context->assets->getUrl('assets/responsiveAttributes.min.js')) ?>"></script>
+        <script id="image-gallery-bearframework-addon-script-3" src="<?= htmlentities($context->assets->getUrl('assets/responsiveAttributes.min.js')) ?>"></script>
         <?php
         if ($onClick === 'fullscreen') {
-            ?><component src="js-lightbox" onload="<?= htmlentities('window.' . $containerID . 'lb = new ivoPetkov.bearFramework.addons.jsLightbox(' . json_encode($lightboxImages) . ');') ?>"/><?php
+            ?><component src="js-lightbox" onload="<?= htmlentities('window.' . $containerID . 'ig = new ivoPetkov.bearFramework.addons.imageGallery(' . json_encode($jsData) . ');') ?>"/><?php
         }
         ?>
     <div<?= $containerAttributes ?>>
@@ -144,7 +157,7 @@ if (isset($class{0})) {
             $titleAttribute = isset($title{0}) ? ' title="' . htmlentities($title) . '"' : '';
             echo '<div>';
             if ($onClick === 'fullscreen') {
-                echo '<a' . $titleAttribute . ' onclick="window.' . $containerID . 'lb.open(' . $index . ');" style="cursor:pointer;">';
+                echo '<a' . $titleAttribute . ' onclick="window.' . $containerID . 'ig.open(' . $index . ');" style="cursor:pointer;">';
             } elseif ($onClick === 'url') {
                 $url = (string) $file->getAttribute('url');
                 echo '<a' . $titleAttribute . ' href="' . (isset($url{0}) ? htmlentities($url) : '#') . '">';
