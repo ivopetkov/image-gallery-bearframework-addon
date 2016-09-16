@@ -18,7 +18,7 @@ ivoPetkov.bearFramework.addons.imageGallery = (function () {
         var updateImages = function () {
             var imagesCount = data.images.length;
             for (var index = 0; index < imagesCount; index++) {
-                var imageContainerID = data.containerID + 'img' + index;
+                var imageContainerID = data.galleryID + 'img' + index;
                 var imageContainer = document.getElementById(imageContainerID);
                 if (imageContainer !== null) {
                     var computedStyle = window.getComputedStyle(imageContainer.parentNode);

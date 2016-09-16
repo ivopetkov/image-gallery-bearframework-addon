@@ -6,6 +6,13 @@
  * Free to use under the MIT license.
  */
 
+$hasLightbox = false;
+$hasResponsiveAttributes = false;
+$hasElementID = false;
+
+$internalOptionRenderContainer = $component->getAttribute('internal-option-render-container') !== 'false';
+$internalOptionRenderImageContainer = $component->getAttribute('internal-option-render-image-container') !== 'false';
+
 $domDocument = new IvoPetkov\HTML5DOMDocument();
 $domDocument->loadHTML($component->innerHTML);
 $files = $domDocument->querySelectorAll('file');
@@ -24,6 +31,12 @@ if ($temp !== '') {
     if (preg_match('/^[0-9\.]+:[0-9\.]+$/', $temp) === 1) {
         $imageAspectRatio = $temp;
     }
+}
+
+$imageLoadingBackground = null;
+$temp = (string) $component->imageLoadingBackground;
+if ($temp !== '') {
+    $imageLoadingBackground = $temp;
 }
 
 $columnsCount = 'auto';
@@ -51,12 +64,13 @@ if ($temp !== '') {
     $spacing = $temp;
 }
 
-$containerID = 'imggallery' . uniqid();
+$galleryID = 'imggallery' . uniqid();
 $containerAttributes = '';
 
 if ($onClick === 'fullscreen') {
+    $hasLightbox = true;
     $jsData = [
-        'containerID' => $containerID,
+        'galleryID' => $galleryID,
         'lightboxData' => [
             'images' => []
         ],
@@ -65,7 +79,7 @@ if ($onClick === 'fullscreen') {
     $index = 0;
     foreach ($files as $file) {
         $filename = $file->getAttribute('filename');
-        $imageContainerID = $containerID . 'img' . $index;
+        $imageContainerID = $galleryID . 'img' . $index;
         $html = $app->components->process('<div id="' . $imageContainerID . '"><component style="background-color:#000;" src="lazy-image" filename="' . $filename . '"/></div>');
         $imageDomDocument = new IvoPetkov\HTML5DOMDocument();
         $imageDomDocument->loadHTML($html);
@@ -74,8 +88,8 @@ if ($onClick === 'fullscreen') {
         $imageHTMLBody->parentNode->removeChild($imageHTMLBody);
         $jsData['lightboxData']['images'][] = [
             'html' => $imageHTML,
-            'onBeforeShow' => 'window.' . $containerID . 'ig.onBeforeShow(' . $index . ');',
-            'onShow' => 'window.' . $containerID . 'ig.onShow(' . $index . ');',
+            'onBeforeShow' => 'window.' . $galleryID . 'ig.onBeforeShow(' . $index . ');',
+            'onShow' => 'window.' . $galleryID . 'ig.onShow(' . $index . ');',
         ];
         list($imageWidth, $imageHeight) = $app->images->getSize($filename);
         $jsData['images'][] = [$imageWidth, $imageHeight, $imageDomDocument->saveHTML()];
@@ -83,11 +97,11 @@ if ($onClick === 'fullscreen') {
     }
 }
 
-$getColumnsStyle = function($columnsCount, $attributeSelector = '') use ($containerID, $spacing) {
-    $result = '#' . $containerID . $attributeSelector . '>div{vertical-align:top;display:inline-block;width:calc((100% - ' . $spacing . '*' . ($columnsCount - 1) . ')/' . $columnsCount . ');margin-right:' . $spacing . ';margin-top:' . $spacing . ';}';
-    $result .= '#' . $containerID . $attributeSelector . '>div:nth-child(' . $columnsCount . 'n){margin-right:0;}';
+$getColumnsStyle = function($columnsCount, $attributeSelector = '') use ($galleryID, $spacing) {
+    $result = '#' . $galleryID . $attributeSelector . '>div{vertical-align:top;display:inline-block;width:calc((100% - ' . $spacing . '*' . ($columnsCount - 1) . ')/' . $columnsCount . ');margin-right:' . $spacing . ';margin-top:' . $spacing . ';}';
+    $result .= '#' . $galleryID . $attributeSelector . '>div:nth-child(' . $columnsCount . 'n){margin-right:0;}';
     for ($i = 1; $i <= $columnsCount; $i++) {
-        $result .= '#' . $containerID . $attributeSelector . '>div:nth-child(' . $i . '){margin-top:0;}';
+        $result .= '#' . $galleryID . $attributeSelector . '>div:nth-child(' . $i . '){margin-top:0;}';
     }
     return $result;
 };
@@ -95,7 +109,12 @@ $getColumnsStyle = function($columnsCount, $attributeSelector = '') use ($contai
 $containerStyle = '';
 if (is_numeric($columnsCount)) { // Fixed columns count
     $containerStyle .= $getColumnsStyle($columnsCount);
+    if ($columnsCount > 1) {
+        $hasElementID = true;
+    }
 } else { // Auto columns count
+    $hasResponsiveAttributes = true;
+    $hasElementID = true;
     $imageWidthMultipliers = [
         'tiny' => 1,
         'small' => 2,
@@ -119,35 +138,44 @@ if (is_numeric($columnsCount)) { // Fixed columns count
 }
 
 $imageAttributes = '';
+
 if ($imageAspectRatio !== null) {
     $imageAttributes .= ' aspectRatio="' . $imageAspectRatio . '"';
 }
 
-$containerAttributes .= ' id="' . htmlentities($containerID) . '"';
+if ($imageLoadingBackground !== null) {
+    $imageAttributes .= ' loadingBackground="' . $imageLoadingBackground . '"';
+}
+
+if ($hasElementID) {
+    $containerAttributes .= ' id="' . htmlentities($galleryID) . '"';
+}
 
 $class = (string) $component->class;
 if (isset($class{0})) {
     $containerAttributes .= ' class="' . htmlentities($class) . '"';
 }
 ?><html>
-    <head>
-        <script id="image-gallery-bearframework-addon-script-1" src="<?= htmlentities($context->assets->getUrl('assets/HTML5DOMDocument.min.js')) ?>"></script>
-        <?php
-        if ($onClick === 'fullscreen') {
-            ?><script id="image-gallery-bearframework-addon-script-2" src="<?= htmlentities($context->assets->getUrl('assets/imageGallery.min.js')) ?>"></script><?php
+    <head><?php
+        if ($hasLightbox) {
+            echo '<script id="image-gallery-bearframework-addon-script-1" src="' . htmlentities($context->assets->getUrl('assets/HTML5DOMDocument.min.js')) . '"></script>';
+            echo '<script id="image-gallery-bearframework-addon-script-2" src="' . htmlentities($context->assets->getUrl('assets/imageGallery.min.js')) . '"></script>';
         }
-        ?>
-        <style><?= $containerStyle ?></style>
-    </head>
+        if ($hasResponsiveAttributes) {
+            echo '<script id="image-gallery-bearframework-addon-script-3" src="' . htmlentities($context->assets->getUrl('assets/responsiveAttributes.min.js')) . '"></script>';
+        }
+        if (isset($containerStyle{0})) {
+            echo '<style>' . $containerStyle . '</style>';
+        }
+        ?></head>
     <body>
-        <script id="image-gallery-bearframework-addon-script-3" src="<?= htmlentities($context->assets->getUrl('assets/responsiveAttributes.min.js')) ?>"></script>
         <?php
-        if ($onClick === 'fullscreen') {
-            ?><component src="js-lightbox" onload="<?= htmlentities('window.' . $containerID . 'ig = new ivoPetkov.bearFramework.addons.imageGallery(' . json_encode($jsData) . ');') ?>"/><?php
+        if ($hasLightbox) {
+            ?><component src="js-lightbox" onload="<?= htmlentities('window.' . $galleryID . 'ig = new ivoPetkov.bearFramework.addons.imageGallery(' . json_encode($jsData) . ');') ?>"/><?php
         }
-        ?>
-    <div<?= $containerAttributes ?>>
-        <?php
+        if ($internalOptionRenderContainer) {
+            echo '<div' . $containerAttributes . '>';
+        }
         foreach ($files as $index => $file) {
             $class = (string) $file->getAttribute('class');
             $classAttribute = isset($class{0}) ? ' class="' . htmlentities($class) . '"' : '';
@@ -155,9 +183,11 @@ if (isset($class{0})) {
             $altAttribute = isset($alt{0}) ? ' alt="' . htmlentities($alt) . '"' : '';
             $title = (string) $file->getAttribute('title');
             $titleAttribute = isset($title{0}) ? ' title="' . htmlentities($title) . '"' : '';
-            echo '<div>';
+            if ($internalOptionRenderImageContainer) {
+                echo '<div>';
+            }
             if ($onClick === 'fullscreen') {
-                echo '<a' . $titleAttribute . ' onclick="window.' . $containerID . 'ig.open(' . $index . ');" style="cursor:pointer;">';
+                echo '<a' . $titleAttribute . ' onclick="window.' . $galleryID . 'ig.open(' . $index . ');" style="cursor:pointer;">';
             } elseif ($onClick === 'url') {
                 $url = (string) $file->getAttribute('url');
                 echo '<a' . $titleAttribute . ' href="' . (isset($url{0}) ? htmlentities($url) : '#') . '">';
@@ -170,10 +200,16 @@ if (isset($class{0})) {
             if ($onClick === 'fullscreen' || $onClick === 'url' || $onClick === 'custom') {
                 echo '</a>';
             }
+            if ($internalOptionRenderImageContainer) {
+                echo '</div>';
+            }
+        }
+        if ($internalOptionRenderContainer) {
             echo '</div>';
         }
-        ?>
-    </div>
-    <script>responsiveAttributes.run();</script>
+        if ($hasResponsiveAttributes) {
+            ?><script>responsiveAttributes.run();</script><?php
+    }
+    ?>
 </body>
 </html>
