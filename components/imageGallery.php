@@ -6,6 +6,11 @@
  * Free to use under the MIT license.
  */
 
+use \BearFramework\App;
+
+$app = App::get();
+$context = $app->getContext(__FILE__);
+
 $hasLightbox = false;
 $hasResponsiveAttributes = false;
 $hasElementID = false;
