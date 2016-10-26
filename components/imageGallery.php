@@ -69,6 +69,11 @@ if ($temp !== '') {
     $spacing = $temp;
 }
 
+$lazyLoadImages = false;
+if ($component->lazyLoadImages === 'true') {
+    $lazyLoadImages = true;
+}
+
 $galleryID = 'imggallery' . uniqid();
 $containerAttributes = '';
 
@@ -201,7 +206,39 @@ if (isset($class{0})) {
                 echo '<a' . $titleAttribute . ' onclick="' . htmlentities(isset($onClick{0})) . '" style="cursor:pointer;">';
             }
             $filename = (string) $file->getAttribute('filename');
-            echo '<component src="lazy-image"' . $classAttribute . $altAttribute . $titleAttribute . ' filename="' . htmlentities($filename) . '"' . $imageAttributes . '/>';
+            if ($lazyLoadImages) {
+                echo '<component src="lazy-image"' . $classAttribute . $altAttribute . $titleAttribute . ' filename="' . htmlentities($filename) . '"' . $imageAttributes . '/>';
+            } else {
+                if ($imageAspectRatio !== null) {
+                    $imageAspectRatioParts = explode(':', $imageAspectRatio);
+                    try {
+                        list($imageWidth, $imageHeight) = $app->images->getSize($filename);
+                    } catch (\Exception $e) {
+                        if ($app->config->displayErrors) {
+                            throw $e;
+                        }
+                        $imageWidth = 0;
+                        $imageHeight = 0;
+                    }
+                    $newImageHeight = $imageWidth * $imageAspectRatioParts[1] / $imageAspectRatioParts[0];
+                    if ($newImageHeight > $imageHeight) {
+                        $options = [
+                            'width' => $imageHeight * $imageAspectRatioParts[0] / $imageAspectRatioParts[1],
+                            'height' => $imageHeight
+                        ];
+                    } else {
+                        $options = [
+                            'width' => $imageWidth,
+                            'height' => $newImageHeight
+                        ];
+                    }
+                    $imageUrl = $app->assets->getUrl($filename, $options);
+                } else {
+                    $imageUrl = $app->assets->getUrl($filename);
+                }
+                echo '<img' . $classAttribute . $altAttribute . $titleAttribute . ' style="width:100%;" src="' . $imageUrl . '"/>';
+            }
+
             if ($onClick === 'fullscreen' || $onClick === 'url' || $onClick === 'custom') {
                 echo '</a>';
             }
