@@ -236,7 +236,7 @@ if (isset($class{0})) {
                 } else {
                     $imageUrl = $app->assets->getUrl($filename);
                 }
-                echo '<img' . $classAttribute . $altAttribute . $titleAttribute . ' style="width:100%;" src="' . $imageUrl . '"/>';
+                echo '<img' . $classAttribute . $altAttribute . $titleAttribute . ' style="max-width:100%;" src="' . $imageUrl . '"/>';
             }
 
             if ($onClick === 'fullscreen' || $onClick === 'url' || $onClick === 'custom') {
