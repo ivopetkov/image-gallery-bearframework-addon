@@ -6,14 +6,14 @@
  */
 
 var ivoPetkov = ivoPetkov || {};
-ivoPetkov.bearFramework = ivoPetkov.bearFramework || {};
-ivoPetkov.bearFramework.addons = ivoPetkov.bearFramework.addons || {};
 
-ivoPetkov.bearFramework.addons.imageGallery = (function () {
+ivoPetkov.bearFrameworkAddons = ivoPetkov.bearFrameworkAddons || {};
+
+ivoPetkov.bearFrameworkAddons.imageGallery = (function () {
 
     return function (data) {
 
-        var jsLightbox = new ivoPetkov.bearFramework.addons.jsLightbox(data.lightboxData);
+        var jsLightbox = new ivoPetkov.bearFrameworkAddons.jsLightbox(data.lightboxData);
 
         var updateImages = function () {
             var imagesCount = data.images.length;
