@@ -9,7 +9,7 @@
 use \BearFramework\App;
 
 $app = App::get();
-$context = $app->getContext(__FILE__);
+$context = $app->context->get(__FILE__);
 
 $hasLightbox = false;
 $hasResponsiveAttributes = false;
@@ -181,7 +181,7 @@ if (isset($class{0})) {
     <body>
         <?php
         if ($hasLightbox) {
-            ?><component src="js-lightbox" onload="<?= htmlentities('window.' . $galleryID . 'ig = new ivoPetkov.bearFramework.addons.imageGallery(' . json_encode($jsData) . ');') ?>"/><?php
+            ?><component src="js-lightbox" onload="<?= htmlentities('window.' . $galleryID . 'ig = new ivoPetkov.bearFrameworkAddons.imageGallery(' . json_encode($jsData) . ');') ?>"/><?php
         }
         if ($internalOptionRenderContainer) {
             echo '<div' . $containerAttributes . '>';
