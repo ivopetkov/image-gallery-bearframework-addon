@@ -159,6 +159,9 @@ if ($type === 'columns') {
     }
 } elseif ($type === 'grid') {
 
+    $containerStyle .= '#' . $galleryID . '{opacity:0;}';
+    $containerStyle .= '#' . $galleryID . '[data-grid]{opacity:1;}';
+
     $imageSize = 'medium';
     $maxHeights = [
         'tiny' => 90,
@@ -193,16 +196,17 @@ if ($type === 'columns') {
     $addFilesToRow = function($attributeSelector, $filesOnRow, $isLastRow) use ($galleryID, &$containerStyle, $spacing) {
         $totalWidth = array_sum($filesOnRow);
         $counter = 0;
-        $filesCount = sizeof($filesOnRow);
+        $filesOnRowCount = sizeof($filesOnRow);
         foreach ($filesOnRow as $index => $width) {
             $counter++;
-            $style = 'vertical-align:top;display:inline-block;width:calc((100% - ' . $spacing . '*' . ($filesCount - 1) . ')*' . (number_format($width / $totalWidth, 6, '.', '')) . ');';
-            if ($counter < $filesCount) {
+            $style = 'vertical-align:top;display:inline-block;width:calc((100% - ' . $spacing . '*' . ($filesOnRowCount - 1) . ')*' . (number_format($width / $totalWidth, 6, '.', '')) . ');';
+            if ($counter < $filesOnRowCount) {
                 $style .= 'margin-right:' . $spacing . ';';
             }
-            if ($isLastRow) {
+            if ($filesOnRowCount === 1) {
                 $style .= 'max-width:' . $width . 'px;';
-            } else {
+            }
+            if (!$isLastRow) {
                 $style .= 'margin-bottom:' . $spacing . ';';
             }
             $containerStyle .= '#' . $galleryID . $attributeSelector . '>div:nth-child(' . ($index + 1) . '){' . $style . '}';
@@ -265,11 +269,11 @@ if (isset($class{0})) {
 ?><html>
     <head><?php
         if ($hasLightbox) {
-            echo '<script id="image-gallery-bearframework-addon-script-1" src="' . htmlentities($context->assets->getUrl('assets/HTML5DOMDocument.min.js')) . '"></script>';
-            echo '<script id="image-gallery-bearframework-addon-script-2" src="' . htmlentities($context->assets->getUrl('assets/imageGallery.min.js')) . '"></script>';
+            echo '<script id="image-gallery-bearframework-addon-script-1" src="' . htmlentities($context->assets->getUrl('assets/HTML5DOMDocument.min.js', ['cacheMaxAge' => 999999, 'version' => 1])) . '"></script>';
+            echo '<script id="image-gallery-bearframework-addon-script-2" src="' . htmlentities($context->assets->getUrl('assets/imageGallery.min.js', ['cacheMaxAge' => 999999, 'version' => 1])) . '"></script>';
         }
         if ($hasResponsiveAttributes) {
-            echo '<script id="image-gallery-bearframework-addon-script-3" src="' . htmlentities($context->assets->getUrl('assets/responsiveAttributes.min.js')) . '"></script>';
+            echo '<script id="image-gallery-bearframework-addon-script-3" src="' . htmlentities($context->assets->getUrl('assets/responsiveAttributes.min.js', ['cacheMaxAge' => 999999, 'version' => 1])) . '"></script>';
         }
         if (isset($containerStyle{0})) {
             echo '<style>' . $containerStyle . '</style>';
@@ -306,6 +310,9 @@ if (isset($class{0})) {
             if ($lazyLoadImages) {
                 echo '<component src="lazy-image"' . $classAttribute . $altAttribute . $titleAttribute . ' filename="' . htmlentities($filename) . '"' . $imageAttributes . '/>';
             } else {
+                $options = [];
+                $options['cacheMaxAge'] = 999999;
+                $options['version'] = 1;
                 if ($imageAspectRatio !== null) {
                     $imageAspectRatioParts = explode(':', $imageAspectRatio);
                     try {
@@ -319,15 +326,11 @@ if (isset($class{0})) {
                     }
                     $newImageHeight = $imageWidth * $imageAspectRatioParts[1] / $imageAspectRatioParts[0];
                     if ($newImageHeight > $imageHeight) {
-                        $options = [
-                            'width' => $imageHeight * $imageAspectRatioParts[0] / $imageAspectRatioParts[1],
-                            'height' => $imageHeight
-                        ];
+                        $options['width'] = $imageHeight * $imageAspectRatioParts[0] / $imageAspectRatioParts[1];
+                        $options['height'] = $imageHeight;
                     } else {
-                        $options = [
-                            'width' => $imageWidth,
-                            'height' => $newImageHeight
-                        ];
+                        $options['width'] = $imageWidth;
+                        $options['height'] = $newImageHeight;
                     }
                     $imageUrl = $app->assets->getUrl($filename, $options);
                 } else {
