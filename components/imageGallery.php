@@ -58,6 +58,28 @@ if ($component->lazyLoadImages === 'true') {
 $galleryID = 'imggallery' . uniqid();
 $containerAttributes = '';
 
+$localCache = [];
+$getImageSize = function($filename) use ($app, &$localCache) {
+    $cacheKey = 'image-gallery-image-size-' . $filename;
+    if (isset($localCache[$cacheKey])) {
+        return $localCache[$cacheKey];
+    }
+    $cachedData = $app->cache->getValue($cacheKey);
+    if ($cachedData !== null) {
+        $size = json_decode($cachedData, true);
+        $localCache[$cacheKey] = $size;
+        return $size;
+    }
+    try {
+        $size = $app->images->getSize($filename);
+    } catch (\Exception $ex) {
+        $size = [1, 1];
+    }
+    $localCache[$cacheKey] = $size;
+    $app->cache->set($app->cache->make($cacheKey, json_encode($size)));
+    return $size;
+};
+
 if ($onClick === 'fullscreen') {
     $hasLightbox = true;
     $jsData = [
@@ -82,7 +104,7 @@ if ($onClick === 'fullscreen') {
             'onBeforeShow' => 'window.' . $galleryID . 'ig.onBeforeShow(' . $index . ');',
             'onShow' => 'window.' . $galleryID . 'ig.onShow(' . $index . ');',
         ];
-        list($imageWidth, $imageHeight) = $app->images->getSize($filename);
+        list($imageWidth, $imageHeight) = $getImageSize($filename);
         $jsData['images'][] = [$imageWidth, $imageHeight, $imageDomDocument->saveHTML()];
         $index++;
     }
@@ -184,7 +206,7 @@ if ($type === 'columns') {
     foreach ($files as $index => $file) {
         $filename = (string) $file->getAttribute('filename');
         try {
-            $filesSizes[$index] = $app->images->getSize($filename);
+            $filesSizes[$index] = $getImageSize($filename);
         } catch (\Exception $e) {
             if ($app->config->displayErrors) {
                 throw $e;
@@ -316,7 +338,7 @@ if (isset($class{0})) {
                 if ($imageAspectRatio !== null) {
                     $imageAspectRatioParts = explode(':', $imageAspectRatio);
                     try {
-                        list($imageWidth, $imageHeight) = $app->images->getSize($filename);
+                        list($imageWidth, $imageHeight) = $getImageSize($filename);
                     } catch (\Exception $e) {
                         if ($app->config->displayErrors) {
                             throw $e;
