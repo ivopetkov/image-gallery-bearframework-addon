@@ -225,9 +225,9 @@ if ($type === 'columns') {
             if ($counter < $filesOnRowCount) {
                 $style .= 'margin-right:' . $spacing . ';';
             }
-            if ($filesOnRowCount === 1) {
-                $style .= 'max-width:' . $width . 'px;';
-            }
+            //if ($filesOnRowCount === 1) {
+            $style .= 'max-width:' . ($width * 1.1) . 'px;'; //let them be bigger but only by 10%
+            //}
             if (!$isLastRow) {
                 $style .= 'margin-bottom:' . $spacing . ';';
             }
