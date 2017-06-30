@@ -9,49 +9,52 @@ var ivoPetkov = ivoPetkov || {};
 
 ivoPetkov.bearFrameworkAddons = ivoPetkov.bearFrameworkAddons || {};
 
-ivoPetkov.bearFrameworkAddons.imageGallery = (function () {
+if (typeof ivoPetkov.bearFrameworkAddons.imageGallery === 'undefined') {
+    ivoPetkov.bearFrameworkAddons.imageGallery = (function () {
 
-    return function (data) {
+        return function (data) {
 
-        var jsLightbox = new ivoPetkov.bearFrameworkAddons.jsLightbox(data.lightboxData);
+            var jsLightbox = new ivoPetkov.bearFrameworkAddons.jsLightbox(data.lightboxData);
 
-        var updateImages = function () {
-            var imagesCount = data.images.length;
-            for (var index = 0; index < imagesCount; index++) {
-                var imageContainerID = data.galleryID + 'img' + index;
-                var imageContainer = document.getElementById(imageContainerID);
-                if (imageContainer !== null) {
-                    var computedStyle = window.getComputedStyle(imageContainer.parentNode);
-                    var maxWidth = parseInt(computedStyle.width.replace('px', ''), 10);
-                    var maxHeight = parseInt(computedStyle.height.replace('px', ''), 10);
-                    var imageWidth = data.images[index][0];
-                    var imageHeight = data.images[index][1];
-                    if (imageWidth > maxWidth) {
-                        imageHeight = maxWidth / imageWidth * imageHeight;
-                        imageWidth = maxWidth;
+            var updateImages = function () {
+                var imagesCount = data.images.length;
+                for (var index = 0; index < imagesCount; index++) {
+                    var imageContainerID = data.galleryID + 'img' + index;
+                    var imageContainer = document.getElementById(imageContainerID);
+                    if (imageContainer !== null) {
+                        var computedStyle = window.getComputedStyle(imageContainer.parentNode);
+                        var maxWidth = parseInt(computedStyle.width.replace('px', ''), 10);
+                        var maxHeight = parseInt(computedStyle.height.replace('px', ''), 10);
+                        var imageWidth = data.images[index][0];
+                        var imageHeight = data.images[index][1];
+                        if (imageWidth > maxWidth) {
+                            imageHeight = maxWidth / imageWidth * imageHeight;
+                            imageWidth = maxWidth;
+                        }
+                        if (imageHeight > maxHeight) {
+                            imageWidth = maxHeight / imageHeight * imageWidth;
+                            //imageHeight = maxHeight;
+                        }
+                        imageContainer.style.width = imageWidth + 'px';
                     }
-                    if (imageHeight > maxHeight) {
-                        imageWidth = maxHeight / imageHeight * imageWidth;
-                        //imageHeight = maxHeight;
-                    }
-                    imageContainer.style.width = imageWidth + 'px';
                 }
-            }
-        };
+            };
 
-        this.open = function (index) {
-            jsLightbox.open(index);
-            window.addEventListener('resize', updateImages);
-        };
+            this.open = function (index) {
+                jsLightbox.open(index);
+                window.addEventListener('resize', updateImages);
+            };
 
-        this.onBeforeShow = function (index) {
-            html5DOMDocument.insert(data.images[index][2]);
-            updateImages();
-        };
+            this.onBeforeShow = function (index) {
+                html5DOMDocument.insert(data.images[index][2]);
+                updateImages();
+            };
 
-        this.onShow = function (index) {
-            responsivelyLazy.run();
-        };
+            this.onShow = function (index) {
+                responsivelyLazy.run();
+            };
 
-    };
-}());
+        };
+    }());
+}
+;
