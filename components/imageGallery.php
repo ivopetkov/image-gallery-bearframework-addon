@@ -295,7 +295,7 @@ if (isset($class{0})) {
             echo '<script id="image-gallery-bearframework-addon-script-2" src="' . htmlentities($context->assets->getUrl('assets/imageGallery.min.js', ['cacheMaxAge' => 999999, 'version' => 1])) . '" async></script>';
         }
         if ($hasResponsiveAttributes) {
-            echo '<script id="image-gallery-bearframework-addon-script-3" src="' . htmlentities($context->assets->getUrl('assets/responsiveAttributes.min.js', ['cacheMaxAge' => 999999, 'version' => 1])) . '"></script>';
+            echo '<script id="image-gallery-bearframework-addon-script-3" src="' . htmlentities($context->assets->getUrl('assets/responsiveAttributes.min.js', ['cacheMaxAge' => 999999, 'version' => 1])) . '" async></script>';
         }
         if (isset($containerStyle{0})) {
             echo '<style>' . $containerStyle . '</style>';
@@ -377,7 +377,10 @@ if (isset($class{0})) {
             echo '</div>';
         }
         if ($hasResponsiveAttributes) {
-            ?><script>responsiveAttributes.run();</script><?php
+            echo '<script>'
+            . 'var checkAndExecute=function(b,c){if(b())c();else{var a=function(){b()?(window.clearTimeout(a),c()):window.setTimeout(a,16)};window.setTimeout(a,16)}};'
+            . 'checkAndExecute(function(){return typeof responsiveAttributes!=="undefined"},function(){responsiveAttributes.run();});';
+            echo '</script>';
         }
         ?>
     </body>
