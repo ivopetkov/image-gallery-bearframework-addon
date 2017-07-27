@@ -309,7 +309,6 @@ if (isset($class{0})) {
             . 'var checkAndExecute=function(b,c){if(b())c();else{var a=function(){b()?(window.clearTimeout(a),c()):window.setTimeout(a,16)};window.setTimeout(a,16)}};'
             . 'checkAndExecute(function(){return typeof html5DOMDocument!=="undefined" && typeof ivoPetkov!=="undefined" && typeof ivoPetkov.bearFrameworkAddons!=="undefined" && typeof ivoPetkov.bearFrameworkAddons.imageGallery!=="undefined" && typeof ivoPetkov.bearFrameworkAddons.jsLightbox!=="undefined"},function(){window.' . $galleryID . 'ig = new ivoPetkov.bearFrameworkAddons.imageGallery(' . json_encode($jsData) . ')});';
             echo '</script>';
-            ?>"/><?php
         }
         if ($internalOptionRenderContainer) {
             echo '<div' . $containerAttributes . '>';
