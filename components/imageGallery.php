@@ -291,11 +291,11 @@ if (isset($class{0})) {
 ?><html>
     <head><?php
         if ($hasLightbox) {
-            echo '<script id="image-gallery-bearframework-addon-script-1" src="' . htmlentities($context->assets->getUrl('assets/HTML5DOMDocument.min.js', ['cacheMaxAge' => 999999, 'version' => 1])) . '" async></script>';
-            echo '<script id="image-gallery-bearframework-addon-script-2" src="' . htmlentities($context->assets->getUrl('assets/imageGallery.min.js', ['cacheMaxAge' => 999999, 'version' => 1])) . '" async></script>';
+            echo '<script id="image-gallery-bearframework-addon-script-1" src="' . htmlentities($context->assets->getUrl('assets/HTML5DOMDocument.min.js', ['cacheMaxAge' => 999999999, 'version' => 1])) . '" async></script>';
+            echo '<script id="image-gallery-bearframework-addon-script-2" src="' . htmlentities($context->assets->getUrl('assets/imageGallery.min.js', ['cacheMaxAge' => 999999999, 'version' => 1])) . '" async></script>';
         }
         if ($hasResponsiveAttributes) {
-            echo '<script id="image-gallery-bearframework-addon-script-3" src="' . htmlentities($context->assets->getUrl('assets/responsiveAttributes.min.js', ['cacheMaxAge' => 999999, 'version' => 1])) . '" async></script>';
+            echo '<script id="image-gallery-bearframework-addon-script-3" src="' . htmlentities($context->assets->getUrl('assets/responsiveAttributes.min.js', ['cacheMaxAge' => 999999999, 'version' => 1])) . '" async></script>';
         }
         if (isset($containerStyle{0})) {
             echo '<style>' . $containerStyle . '</style>';
@@ -337,7 +337,7 @@ if (isset($class{0})) {
                 echo '<component src="lazy-image"' . $classAttribute . $altAttribute . $titleAttribute . ' filename="' . htmlentities($filename) . '"' . $imageAttributes . '/>';
             } else {
                 $options = [];
-                $options['cacheMaxAge'] = 999999;
+                $options['cacheMaxAge'] = 999999999;
                 $options['version'] = 1;
                 if ($imageAspectRatio !== null) {
                     $imageAspectRatioParts = explode(':', $imageAspectRatio);
