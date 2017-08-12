@@ -14,7 +14,6 @@ $context = $app->context->get(__FILE__);
 $hasLightbox = false;
 $hasResponsiveAttributes = false;
 $hasElementID = false;
-
 $internalOptionRenderContainer = $component->getAttribute('internal-option-render-container') !== 'false';
 $internalOptionRenderImageContainer = $component->getAttribute('internal-option-render-image-container') !== 'false';
 
@@ -82,32 +81,16 @@ $getImageSize = function($filename) use ($app, &$localCache) {
 
 if ($onClick === 'fullscreen') {
     $hasLightbox = true;
+    $serverData = ['imagegallery', []];
+    foreach ($files as $file) {
+        $serverData[1][] = $file->getAttribute('filename');
+    }
+    $serverData = json_encode($serverData);
     $jsData = [
         'galleryID' => $galleryID,
-        'lightboxData' => [
-            'images' => []
-        ],
-        'images' => []
+        'serverData' => md5($serverData) . base64_encode($app->encryption->encrypt(gzcompress($serverData))),
+        'imagesCount' => $files->length
     ];
-    $index = 0;
-    foreach ($files as $file) {
-        $filename = $file->getAttribute('filename');
-        $imageContainerID = $galleryID . 'img' . $index;
-        $html = $app->components->process('<div id="' . $imageContainerID . '"><component style="background-color:#000;" src="lazy-image" filename="' . $filename . '"/></div>');
-        $imageDomDocument = new IvoPetkov\HTML5DOMDocument();
-        $imageDomDocument->loadHTML($html);
-        $imageHTMLBody = $imageDomDocument->querySelector('body');
-        $imageHTML = $imageHTMLBody->innerHTML;
-        $imageHTMLBody->parentNode->removeChild($imageHTMLBody);
-        $jsData['lightboxData']['images'][] = [
-            'html' => $imageHTML,
-            'onBeforeShow' => 'window.' . $galleryID . 'ig.onBeforeShow(' . $index . ');',
-            'onShow' => 'window.' . $galleryID . 'ig.onShow(' . $index . ');',
-        ];
-        list($imageWidth, $imageHeight) = $getImageSize($filename);
-        $jsData['images'][] = [$imageWidth, $imageHeight, $imageDomDocument->saveHTML()];
-        $index++;
-    }
 }
 
 $imageAspectRatio = null;
@@ -292,7 +275,7 @@ if (isset($class{0})) {
     <head><?php
         if ($hasLightbox) {
             echo '<script id="image-gallery-bearframework-addon-script-1" src="' . htmlentities($context->assets->getUrl('assets/HTML5DOMDocument.min.js', ['cacheMaxAge' => 999999999, 'version' => 1])) . '" async></script>';
-            echo '<script id="image-gallery-bearframework-addon-script-2" src="' . htmlentities($context->assets->getUrl('assets/imageGallery.min.js', ['cacheMaxAge' => 999999999, 'version' => 1])) . '" async></script>';
+            echo '<script id="image-gallery-bearframework-addon-script-2" src="' . htmlentities($context->assets->getUrl('assets/imageGallery.min.js', ['cacheMaxAge' => 999999999, 'version' => 2])) . '" async></script>';
         }
         if ($hasResponsiveAttributes) {
             echo '<script id="image-gallery-bearframework-addon-script-3" src="' . htmlentities($context->assets->getUrl('assets/responsiveAttributes.min.js', ['cacheMaxAge' => 999999999, 'version' => 1])) . '" async></script>';

@@ -11,6 +11,8 @@ BearFramework\Addons::register('ivopetkov/image-gallery-bearframework-addon', __
     'require' => [
         'ivopetkov/html-server-components-bearframework-addon',
         'ivopetkov/lazy-image-bearframework-addon',
-        'ivopetkov/js-lightbox-bearframework-addon'
+        'ivopetkov/js-lightbox-bearframework-addon',
+        'ivopetkov/server-requests-bearframework-addon',
+        'ivopetkov/encryption-bearframework-addon',
     ]
 ]);
