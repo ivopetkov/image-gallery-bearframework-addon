@@ -10,7 +10,7 @@
 /**
  * @runTestsInSeparateProcesses
  */
-class ImageGalleryTest extends BearFrameworkAddonTestCase
+class ImageGalleryTest extends BearFramework\AddonTests\PHPUnitTestCase
 {
 
     /**
@@ -19,9 +19,9 @@ class ImageGalleryTest extends BearFrameworkAddonTestCase
     public function testOutput()
     {
         $app = $this->getApp();
-        $this->createSampleFile($app->config->appDir . '/images/test1.jpg', 'jpg');
-        $this->createSampleFile($app->config->appDir . '/images/test2.jpg', 'jpg');
-        $this->createSampleFile($app->config->appDir . '/images/test3.jpg', 'jpg');
+        $this->makeSampleFile($app->config->appDir . '/images/test1.jpg', 'jpg');
+        $this->makeSampleFile($app->config->appDir . '/images/test2.jpg', 'jpg');
+        $this->makeSampleFile($app->config->appDir . '/images/test3.jpg', 'jpg');
 
         $app->assets->addDir($app->config->appDir . '/images/');
 
