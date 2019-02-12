@@ -6,10 +6,11 @@
  * Free to use under the MIT license.
  */
 
-use \BearFramework\App;
+use BearFramework\App;
+use IvoPetkov\HTML5DOMDocument;
 
 $app = App::get();
-$context = $app->context->get(__FILE__);
+$context = $app->contexts->get(__FILE__);
 
 $hasLightbox = false;
 $hasResponsiveAttributes = false;
@@ -17,8 +18,8 @@ $hasElementID = false;
 $internalOptionRenderContainer = $component->getAttribute('internal-option-render-container') !== 'false';
 $internalOptionRenderImageContainer = $component->getAttribute('internal-option-render-image-container') !== 'false';
 
-$domDocument = new IvoPetkov\HTML5DOMDocument();
-$domDocument->loadHTML($component->innerHTML);
+$domDocument = new HTML5DOMDocument();
+$domDocument->loadHTML($component->innerHTML, HTML5DOMDocument::ALLOW_DUPLICATE_IDS);
 $files = $domDocument->querySelectorAll('file');
 
 $type = 'columns';
@@ -70,8 +71,9 @@ $getImageSize = function($filename) use ($app, &$localCache) {
         return $size;
     }
     try {
-        $size = $app->images->getSize($filename);
-    } catch (\Exception $ex) {
+        $details = $app->assets->getDetails($filename, ['width', 'height']);
+        $size = [$details['width'], $details['height']];
+    } catch (\Exception $e) {
         $size = [1, 1];
     }
     $localCache[$cacheKey] = $size;
@@ -274,11 +276,11 @@ if (isset($class{0})) {
 ?><html>
     <head><?php
         if ($hasLightbox) {
-            echo '<script id="image-gallery-bearframework-addon-script-1" src="' . htmlentities($context->assets->getUrl('assets/HTML5DOMDocument.min.js', ['cacheMaxAge' => 999999999, 'version' => 1])) . '" async></script>';
-            echo '<script id="image-gallery-bearframework-addon-script-2" src="' . htmlentities($context->assets->getUrl('assets/imageGallery.min.js', ['cacheMaxAge' => 999999999, 'version' => 2])) . '" async></script>';
+            echo '<script id="image-gallery-bearframework-addon-script-1" src="' . htmlentities($context->assets->getURL('assets/HTML5DOMDocument.min.js', ['cacheMaxAge' => 999999999, 'version' => 1])) . '" async></script>';
+            echo '<script id="image-gallery-bearframework-addon-script-2" src="' . htmlentities($context->assets->getURL('assets/imageGallery.min.js', ['cacheMaxAge' => 999999999, 'version' => 2])) . '" async></script>';
         }
         if ($hasResponsiveAttributes) {
-            echo '<script id="image-gallery-bearframework-addon-script-3" src="' . htmlentities($context->assets->getUrl('assets/responsiveAttributes.min.js', ['cacheMaxAge' => 999999999, 'version' => 1])) . '" async></script>';
+            echo '<script id="image-gallery-bearframework-addon-script-3" src="' . htmlentities($context->assets->getURL('assets/responsiveAttributes.min.js', ['cacheMaxAge' => 999999999, 'version' => 1])) . '" async></script>';
         }
         if (isset($containerStyle{0})) {
             echo '<style>' . $containerStyle . '</style>';
@@ -341,9 +343,9 @@ if (isset($class{0})) {
                         $options['width'] = $imageWidth;
                         $options['height'] = $newImageHeight;
                     }
-                    $imageUrl = $app->assets->getUrl($filename, $options);
+                    $imageUrl = $app->assets->getURL($filename, $options);
                 } else {
-                    $imageUrl = $app->assets->getUrl($filename);
+                    $imageUrl = $app->assets->getURL($filename);
                 }
                 echo '<img' . $classAttribute . $altAttribute . $titleAttribute . ' style="max-width:100%;" src="' . $imageUrl . '"/>';
             }

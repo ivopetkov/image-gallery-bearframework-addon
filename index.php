@@ -10,7 +10,7 @@
 use \BearFramework\App;
 
 $app = App::get();
-$context = $app->context->get(__FILE__);
+$context = $app->contexts->get(__FILE__);
 
 $context->assets->addDir('assets');
 
@@ -41,8 +41,9 @@ $app->serverRequests
                             return $size;
                         }
                         try {
-                            $size = $app->images->getSize($filename);
-                        } catch (\Exception $ex) {
+                            $details = $app->assets->getDetails($filename, ['width', 'height']);
+                            $size = [$details['width'], $details['height']];
+                        } catch (\Exception $e) {
                             $size = [1, 1];
                         }
                         $app->cache->set($app->cache->make($cacheKey, json_encode($size)));
