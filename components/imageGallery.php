@@ -58,27 +58,22 @@ if ($component->lazyLoadImages === 'true') {
 $galleryID = 'imggallery' . uniqid();
 $containerAttributes = '';
 
-$localCache = [];
-$getImageSize = function($filename) use ($app, &$localCache) {
-    $cacheKey = 'image-gallery-image-size-' . $filename;
-    if (isset($localCache[$cacheKey])) {
-        return $localCache[$cacheKey];
+$getImagesSizes = function($filenames) use ($app) {
+    if (empty($filenames)) {
+        return [];
     }
+    $cacheKey = 'image-gallery-images-sizes-' . md5(serialize($filenames));
     $cachedData = $app->cache->getValue($cacheKey);
     if ($cachedData !== null) {
-        $size = json_decode($cachedData, true);
-        $localCache[$cacheKey] = $size;
-        return $size;
+        return json_decode($cachedData, true);
     }
-    try {
+    $result = [];
+    foreach ($filenames as $index => $filename) {
         $details = $app->assets->getDetails($filename, ['width', 'height']);
-        $size = [$details['width'], $details['height']];
-    } catch (\Exception $e) {
-        $size = [1, 1];
+        $result[$index] = [$details['width'], $details['height']];
     }
-    $localCache[$cacheKey] = $size;
-    $app->cache->set($app->cache->make($cacheKey, json_encode($size)));
-    return $size;
+    $app->cache->set($app->cache->make($cacheKey, json_encode($result)));
+    return $result;
 };
 
 if ($onClick === 'fullscreen') {
@@ -187,18 +182,12 @@ if ($type === 'columns') {
     $hasResponsiveAttributes = true;
     $hasElementID = true;
     $maxHeight = $maxHeights[$imageSize];
-    $filesSizes = [];
+
+    $filenames = [];
     foreach ($files as $index => $file) {
-        $filename = (string) $file->getAttribute('filename');
-        try {
-            $filesSizes[$index] = $getImageSize($filename);
-        } catch (\Exception $e) {
-            if ($app->config->displayErrors) {
-                throw $e;
-            }
-            $filesSizes[$index] = [0, 0];
-        }
+        $filenames[] = (string) $file->getAttribute('filename');
     }
+    $filesSizes = $getImagesSizes($filenames);
 
     $addFilesToRow = function($attributeSelector, $filesOnRow, $isLastRow) use ($galleryID, &$containerStyle, $spacing) {
         $totalWidth = array_sum($filesOnRow);
@@ -206,7 +195,7 @@ if ($type === 'columns') {
         $filesOnRowCount = sizeof($filesOnRow);
         foreach ($filesOnRow as $index => $width) {
             $counter++;
-            $style = 'vertical-align:top;display:inline-block;width:calc((100% - ' . $spacing . '*' . ($filesOnRowCount - 1) . ')*' . (number_format($width / $totalWidth, 6, '.', '')) . ');';
+            $style = 'vertical-align:top;display:inline-block;width:calc((100% - ' . $spacing . '*' . ($filesOnRowCount - 1) . ')*' . (number_format($totalWidth === 0 ? 0 : $width / $totalWidth, 6, '.', '')) . ');';
             if ($counter < $filesOnRowCount) {
                 $style .= 'margin-right:' . $spacing . ';';
             }
@@ -233,7 +222,7 @@ if ($type === 'columns') {
         foreach ($filesSizes as $index => $fileSize) {
             $counter++;
             list($fileWidth, $fileHeight) = $fileSize;
-            $maxFileWidth = $maxHeight / $fileHeight * $fileWidth;
+            $maxFileWidth = $fileWidth === null || $fileHeight === null ? 0 : $maxHeight / $fileHeight * $fileWidth;
             if ($totalRowImagesWidth + $maxFileWidth > $maxWidth) {
                 if (!empty($filesOnRow)) {
                     $addFilesToRow($selector, $filesOnRow, false);
@@ -298,6 +287,13 @@ if (isset($class{0})) {
         if ($internalOptionRenderContainer) {
             echo '<div' . $containerAttributes . '>';
         }
+        if (!$lazyLoadImages && $imageAspectRatio !== null) {
+            $filenames = [];
+            foreach ($files as $index => $file) {
+                $filenames[] = (string) $file->getAttribute('filename');
+            }
+            $filesSizes = $getImagesSizes($filenames);
+        }
         foreach ($files as $index => $file) {
             $class = (string) $file->getAttribute('class');
             $classAttribute = isset($class{0}) ? ' class="' . htmlentities($class) . '"' : '';
@@ -326,22 +322,16 @@ if (isset($class{0})) {
                 $options['version'] = 1;
                 if ($imageAspectRatio !== null) {
                     $imageAspectRatioParts = explode(':', $imageAspectRatio);
-                    try {
-                        list($imageWidth, $imageHeight) = $getImageSize($filename);
-                    } catch (\Exception $e) {
-                        if ($app->config->displayErrors) {
-                            throw $e;
-                        }
-                        $imageWidth = 0;
-                        $imageHeight = 0;
-                    }
+                    list($imageWidth, $imageHeight) = $filesSizes[$index];
                     $newImageHeight = $imageWidth * $imageAspectRatioParts[1] / $imageAspectRatioParts[0];
-                    if ($newImageHeight > $imageHeight) {
-                        $options['width'] = $imageHeight * $imageAspectRatioParts[0] / $imageAspectRatioParts[1];
-                        $options['height'] = $imageHeight;
-                    } else {
-                        $options['width'] = $imageWidth;
-                        $options['height'] = $newImageHeight;
+                    if ($imageWidth !== null && $imageHeight !== null) {
+                        if ($newImageHeight > $imageHeight) {
+                            $options['width'] = (int) ($imageHeight * $imageAspectRatioParts[0] / $imageAspectRatioParts[1]);
+                            $options['height'] = $imageHeight;
+                        } else {
+                            $options['width'] = $imageWidth;
+                            $options['height'] = $newImageHeight;
+                        }
                     }
                     $imageUrl = $app->assets->getURL($filename, $options);
                 } else {
