@@ -83,11 +83,12 @@ if ($onClick === 'fullscreen') {
         $serverData[1][] = $file->getAttribute('filename');
     }
     $serverData = json_encode($serverData);
-    $jsData = [
-        'galleryID' => $galleryID,
-        'serverData' => md5($serverData) . base64_encode($app->encryption->encrypt(gzcompress($serverData))),
-        'imagesCount' => $files->length
-    ];
+//    $jsData = [
+//        'galleryID' => $galleryID,
+//        'serverData' => md5($serverData) . base64_encode($app->encryption->encrypt(gzcompress($serverData))),
+//        'imagesCount' => $files->length
+//    ];
+    $jsData = md5($serverData) . base64_encode($app->encryption->encrypt(gzcompress($serverData)));
 }
 
 $imageAspectRatio = null;
@@ -265,11 +266,10 @@ if (isset($class{0})) {
 ?><html>
     <head><?php
         if ($hasLightbox) {
-            echo '<script id="image-gallery-bearframework-addon-script-1" src="' . htmlentities($context->assets->getURL('assets/HTML5DOMDocument.min.js', ['cacheMaxAge' => 999999999, 'version' => 1])) . '" async></script>';
-            echo '<script id="image-gallery-bearframework-addon-script-2" src="' . htmlentities($context->assets->getURL('assets/imageGallery.min.js', ['cacheMaxAge' => 999999999, 'version' => 2])) . '" async></script>';
+            echo '<link rel="client-shortcuts-embed" name="lightbox">';
         }
         if ($hasResponsiveAttributes) {
-            echo '<script id="image-gallery-bearframework-addon-script-3" src="' . htmlentities($context->assets->getURL('assets/responsiveAttributes.min.js', ['cacheMaxAge' => 999999999, 'version' => 1])) . '" async></script>';
+            echo '<link rel="client-shortcuts-embed" name="-ivopetkov-image-gallery-responsive-attributes">';
         }
         if (isset($containerStyle{0})) {
             echo '<style>' . $containerStyle . '</style>';
@@ -278,10 +278,8 @@ if (isset($class{0})) {
     <body>
         <?php
         if ($hasLightbox) {
-            echo '<component src="js-lightbox" />';
-            echo '<script>'
-            . 'var checkAndExecute=function(b,c){if(b())c();else{var a=function(){b()?(window.clearTimeout(a),c()):window.setTimeout(a,16)};window.setTimeout(a,16)}};'
-            . 'checkAndExecute(function(){return typeof html5DOMDocument!=="undefined" && typeof ivoPetkov!=="undefined" && typeof ivoPetkov.bearFrameworkAddons!=="undefined" && typeof ivoPetkov.bearFrameworkAddons.imageGallery!=="undefined" && typeof ivoPetkov.bearFrameworkAddons.jsLightbox!=="undefined"},function(){window.' . $galleryID . 'ig = new ivoPetkov.bearFrameworkAddons.imageGallery(' . json_encode($jsData) . ')});';
+            echo '<script>';
+            echo 'window.' . $galleryID . '=' . json_encode($jsData) . ';';
             echo '</script>';
         }
         if ($internalOptionRenderContainer) {
@@ -305,7 +303,12 @@ if (isset($class{0})) {
                 echo '<div>';
             }
             if ($onClick === 'fullscreen') {
-                echo '<a' . $titleAttribute . ' onclick="window.' . $galleryID . 'ig.open(' . $index . ');" style="cursor:pointer;">';
+                $imageOnClick = 'clientShortcuts.get(\'lightbox\').then(function(lightbox){lightbox.wait(function(context){' .
+                        'clientShortcuts.get(\'-ivopetkov-image-gallery-lightbox\').then(function(imageGalleryLightbox){' .
+                        'imageGalleryLightbox.open(context,window.' . $galleryID . ',' . $index . ');' .
+                        '})' .
+                        '})});';
+                echo '<a' . $titleAttribute . ' onclick="' . htmlentities($imageOnClick) . '" style="cursor:pointer;">';
             } elseif ($onClick === 'url') {
                 $url = (string) $file->getAttribute('url');
                 echo '<a' . $titleAttribute . ' href="' . (isset($url{0}) ? htmlentities($url) : '#') . '">';
@@ -351,10 +354,7 @@ if (isset($class{0})) {
             echo '</div>';
         }
         if ($hasResponsiveAttributes) {
-            echo '<script>'
-            . 'var checkAndExecute=function(b,c){if(b())c();else{var a=function(){b()?(window.clearTimeout(a),c()):window.setTimeout(a,16)};window.setTimeout(a,16)}};'
-            . 'checkAndExecute(function(){return typeof responsiveAttributes!=="undefined"},function(){responsiveAttributes.run();});';
-            echo '</script>';
+            echo '<script>clientShortcuts.get(\'-ivopetkov-image-gallery-responsive-attributes\').then(function(responsiveAttributes){responsiveAttributes.run();})</script>';
         }
         ?>
     </body>

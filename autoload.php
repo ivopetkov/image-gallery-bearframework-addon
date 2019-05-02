@@ -14,5 +14,6 @@ BearFramework\Addons::register('ivopetkov/image-gallery-bearframework-addon', __
         'ivopetkov/js-lightbox-bearframework-addon',
         'ivopetkov/server-requests-bearframework-addon',
         'ivopetkov/encryption-bearframework-addon',
+        'ivopetkov/client-shortcuts-bearframework-addon'
     ]
 ]);
