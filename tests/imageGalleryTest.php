@@ -36,7 +36,6 @@ class ImageGalleryTest extends BearFramework\AddonTests\PHPUnitTestCase
         $this->assertTrue(strpos($result, '/test1.jpg') !== false);
         $this->assertTrue(strpos($result, '/test2.jpg') !== false);
         $this->assertTrue(strpos($result, '/test3.jpg') !== false);
-        $this->assertTrue(strpos($result, '/responsiveAttributes.min.js') !== false);
     }
 
 }
