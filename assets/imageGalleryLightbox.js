@@ -51,7 +51,7 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
                 var response = {};
             }
             if (typeof response.status !== 'undefined' && response.status === '1') {
-                clientShortcuts.get('-ivopetkov-image-gallery-swiper').then(function () {
+                clientShortcuts.get('-ivopetkov-image-gallery-lightbox-requirements').then(function () {
                     var images = response.result;
                     var imagesCount = images.length;
                     var containerID = 'imggalleryswp' + swiperCounter;
@@ -67,49 +67,50 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
                     html += '</div>';
 
                     html += '<div style="z-index:10010001;position:fixed;top:0;left:0;">';
-                    var buttonStyle = 'display:none;width:42px;height:42px;position:fixed;top:calc((100% - 42px)/2);cursor:pointer;color:rgba(255,255,255,0.8);font-size:40px;line-height:40px;padding-left:9px;box-sizing:border-box;';
-                    html += '<span style="right:0;' + buttonStyle + '">&#10151;</span>';
-                    html += '<span style="left:0;' + buttonStyle + 'transform:rotate(180deg);">&#10151;</span>';
+                    var buttonStyle = 'display:none;overflow:hidden;width:42px;height:42px;position:fixed;top:calc((100% - 42px)/2);cursor:pointer;color:rgba(255,255,255,0.8);font-size:80px;line-height:80px;padding-left:9px;box-sizing:border-box;';
+                    var innerStyle = 'display:block;width:80px;height:80px;position:absolute;text-shadow:#000 0 0 3px;';
+                    html += '<span style="right:0;' + buttonStyle + '"><span style="' + innerStyle + 'margin-left:-36px;margin-top:-38px;">&#10563;</span></span>';
+                    html += '<span style="left:0;' + buttonStyle + '"><span style="' + innerStyle + 'margin-left:-7px;margin-top:-38px;">&#10562;</span></span>';
                     html += '</div>';
 
                     html += '</div>';
-                    lightbox.open(html, {'spacing': '0px'});
+                    lightbox.open(html, {'spacing': '0px'}).then(function () {
+                        var container = document.getElementById(containerID);
 
-                    var container = document.getElementById(containerID);
-
-                    for (var i = 0; i < imagesCount; i++) {
-                        var image = images[i];
-                        html5DOMDocument.insert(image[2], [container.firstChild.childNodes[i].firstChild]);
-                    }
-
-                    var swiperObject = new Swiper('#' + containerID, {
-                        direction: 'horizontal',
-                        loop: false,
-                        keyboardControl: true,
-                        mousewheelControl: true
-                    });
-                    swiperObject.slideTo(index, 0);
-
-                    var nextButton = container.childNodes[1].childNodes[0];
-                    nextButton.addEventListener('click', swiperObject.slideNext);
-                    var previousButton = container.childNodes[1].childNodes[1];
-                    previousButton.addEventListener('click', swiperObject.slidePrev);
-
-                    var updateButtons = function (index) {
-                        if (imagesCount < 2) {
-                            return;
+                        for (var i = 0; i < imagesCount; i++) {
+                            var image = images[i];
+                            html5DOMDocument.insert(image[2], [container.firstChild.childNodes[i].firstChild]);
                         }
-                        nextButton.style.display = index + 1 < imagesCount ? 'block' : 'none';
-                        previousButton.style.display = index === 0 ? 'none' : 'block';
-                    };
 
-                    swiperObject.on('slideChangeStart', function (swiper) {
-                        updateButtons(swiper.activeIndex);
-                    });
+                        var swiperObject = new Swiper('#' + containerID, {
+                            direction: 'horizontal',
+                            loop: false,
+                            keyboardControl: true,
+                            mousewheelControl: true
+                        });
+                        swiperObject.slideTo(index, 0);
+
+                        var nextButton = container.childNodes[1].childNodes[0];
+                        nextButton.addEventListener('click', swiperObject.slideNext);
+                        var previousButton = container.childNodes[1].childNodes[1];
+                        previousButton.addEventListener('click', swiperObject.slidePrev);
+
+                        var updateButtons = function (index) {
+                            if (imagesCount < 2) {
+                                return;
+                            }
+                            nextButton.style.display = index + 1 < imagesCount ? 'block' : 'none';
+                            previousButton.style.display = index === 0 ? 'none' : 'block';
+                        };
+
+                        swiperObject.on('slideChangeStart', function (swiper) {
+                            updateButtons(swiper.activeIndex);
+                        });
 //                    swiperObject.on('slideChangeEnd', function (swiper) {
 //                        
 //                    });
-                    updateButtons(index);
+                        updateButtons(index);
+                    });
                 });
             }
         };

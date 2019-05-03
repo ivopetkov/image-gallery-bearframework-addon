@@ -68,7 +68,7 @@ $app->clientShortcuts
         ->add('-ivopetkov-image-gallery-lightbox', function(IvoPetkov\BearFrameworkAddons\ClientShortcut $shortcut) use ($context) {
             $shortcut->requirements[] = [
                 'type' => 'file',
-                'url' => $context->assets->getURL('assets/imageGalleryLightbox.min.js', ['cacheMaxAge' => 999999999, 'version' => 1]),
+                'url' => $context->assets->getURL('assets/imageGalleryLightbox.min.js', ['cacheMaxAge' => 999999999, 'version' => 3]),
                 'mimeType' => 'text/javascript'
             ];
             $shortcut->get = 'return ivoPetkov.bearFrameworkAddons.imageGalleryLightbox;';
@@ -81,7 +81,7 @@ $app->clientShortcuts
             ];
             $shortcut->get = 'return responsiveAttributes;';
         })
-        ->add('-ivopetkov-image-gallery-swiper', function(IvoPetkov\BearFrameworkAddons\ClientShortcut $shortcut) use ($context) {
+        ->add('-ivopetkov-image-gallery-lightbox-requirements', function(IvoPetkov\BearFrameworkAddons\ClientShortcut $shortcut) use ($context) {
             $shortcut->requirements[] = [
                 'type' => 'file',
                 'url' => $context->assets->getURL('assets/swiper.min.js', ['cacheMaxAge' => 999999999, 'version' => 1]),
