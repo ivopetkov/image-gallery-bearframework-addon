@@ -266,10 +266,11 @@ if (isset($class{0})) {
 ?><html>
     <head><?php
         if ($hasLightbox) {
-            echo '<link rel="client-shortcuts-embed" name="lightbox">';
+            echo '<link rel="client-packages-embed" name="lightbox">';
+            echo '<link rel="client-packages-prepare" name="-ivopetkov-image-gallery-lightbox">';
         }
         if ($hasResponsiveAttributes) {
-            echo '<link rel="client-shortcuts-embed" name="-ivopetkov-image-gallery-responsive-attributes">';
+            echo '<link rel="client-packages-embed" name="-ivopetkov-image-gallery-responsive-attributes">';
         }
         if (isset($containerStyle{0})) {
             echo '<style>' . $containerStyle . '</style>';
@@ -303,11 +304,11 @@ if (isset($class{0})) {
                 echo '<div>';
             }
             if ($onClick === 'fullscreen') {
-                $imageOnClick = 'clientShortcuts.get(\'lightbox\').then(function(lightbox){lightbox.wait(function(context){' .
-                        'clientShortcuts.get(\'-ivopetkov-image-gallery-lightbox\').then(function(imageGalleryLightbox){' .
+                $imageOnClick = 'clientPackages.get(\'lightbox\').then(function(lightbox){var context=lightbox.make();' .
+                        'clientPackages.get(\'-ivopetkov-image-gallery-lightbox\').then(function(imageGalleryLightbox){' .
                         'imageGalleryLightbox.open(context,window.' . $galleryID . ',' . $index . ');' .
                         '})' .
-                        '})});';
+                        '});';
                 echo '<a' . $titleAttribute . ' onclick="' . htmlentities($imageOnClick) . '" style="cursor:pointer;">';
             } elseif ($onClick === 'url') {
                 $url = (string) $file->getAttribute('url');
@@ -354,7 +355,7 @@ if (isset($class{0})) {
             echo '</div>';
         }
         if ($hasResponsiveAttributes) {
-            echo '<script>clientShortcuts.get(\'-ivopetkov-image-gallery-responsive-attributes\').then(function(responsiveAttributes){responsiveAttributes.run();})</script>';
+            echo '<script>clientPackages.get(\'-ivopetkov-image-gallery-responsive-attributes\').then(function(responsiveAttributes){responsiveAttributes.run();})</script>';
         }
         ?>
     </body>

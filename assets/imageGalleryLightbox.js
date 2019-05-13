@@ -5,6 +5,8 @@
  * Free to use under the MIT license.
  */
 
+/* global clientPackages, html5DOMDocument */
+
 var ivoPetkov = ivoPetkov || {};
 ivoPetkov.bearFrameworkAddons = ivoPetkov.bearFrameworkAddons || {};
 ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddons.imageGalleryLightbox || (function () {
@@ -51,7 +53,7 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
                 var response = {};
             }
             if (typeof response.status !== 'undefined' && response.status === '1') {
-                clientShortcuts.get('-ivopetkov-image-gallery-lightbox-requirements').then(function () {
+                clientPackages.get('-ivopetkov-image-gallery-lightbox-requirements').then(function () {
                     var images = response.result;
                     var imagesCount = images.length;
                     var containerID = 'imggalleryswp' + swiperCounter;
@@ -118,7 +120,7 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
         if (typeof cachedDataResponses[serverData] !== 'undefined') {
             showResponse(cachedDataResponses[serverData]);
         } else {
-            clientShortcuts.get('serverRequests').then(function (serverRequests) {
+            clientPackages.get('serverRequests').then(function (serverRequests) {
                 serverRequests.send('-ivopetkov-image-gallery-get-images', {'serverData': serverData}).then(function (responseText) {
                     cachedDataResponses[serverData] = responseText;
                     showResponse(responseText);
