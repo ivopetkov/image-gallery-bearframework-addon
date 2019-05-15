@@ -267,7 +267,6 @@ if (isset($class{0})) {
     <head><?php
         if ($hasLightbox) {
             echo '<link rel="client-packages-embed" name="lightbox">';
-            echo '<link rel="client-packages-prepare" name="-ivopetkov-image-gallery-lightbox">';
         }
         if ($hasResponsiveAttributes) {
             echo '<link rel="client-packages-embed" name="-ivopetkov-image-gallery-responsive-attributes">';
