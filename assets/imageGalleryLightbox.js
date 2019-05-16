@@ -69,10 +69,10 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
                     html += '</div>';
 
                     html += '<div style="z-index:10010001;position:fixed;top:0;left:0;">';
-                    var buttonStyle = 'display:none;overflow:hidden;width:42px;height:42px;position:fixed;top:calc((100% - 42px)/2);cursor:pointer;color:rgba(255,255,255,0.8);font-size:80px;line-height:80px;padding-left:9px;box-sizing:border-box;';
-                    var innerStyle = 'display:block;width:80px;height:80px;position:absolute;text-shadow:#000 0 0 3px;';
-                    html += '<span style="right:0;' + buttonStyle + '"><span style="' + innerStyle + 'margin-left:-36px;margin-top:-38px;">&#10563;</span></span>';
-                    html += '<span style="left:0;' + buttonStyle + '"><span style="' + innerStyle + 'margin-left:-7px;margin-top:-38px;">&#10562;</span></span>';
+                    var buttonStyle = 'display:none;overflow:hidden;width:42px;height:42px;position:fixed;top:calc((100% - 42px)/2);cursor:pointer;align-items:center;justify-content:center;';
+                    var innerStyle = 'display:block;width:0;height:0;border-style:solid;';
+                    html += '<span style="right:0;' + buttonStyle + '"><span style="' + innerStyle + 'border-width:15px 0 15px 15px;border-color:transparent transparent transparent rgba(255,255,255,0.8);"></span></span>';
+                    html += '<span style="left:0;' + buttonStyle + '"><span style="' + innerStyle + 'border-width:15px 15px 15px 0;border-color:transparent rgba(255,255,255,0.8) transparent transparent;"></span></span>';
                     html += '</div>';
 
                     html += '</div>';
@@ -101,8 +101,8 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
                             if (imagesCount < 2) {
                                 return;
                             }
-                            nextButton.style.display = index + 1 < imagesCount ? 'block' : 'none';
-                            previousButton.style.display = index === 0 ? 'none' : 'block';
+                            nextButton.style.display = index + 1 < imagesCount ? 'flex' : 'none';
+                            previousButton.style.display = index === 0 ? 'none' : 'flex';
                         };
 
                         swiperObject.on('slideChangeStart', function (swiper) {
