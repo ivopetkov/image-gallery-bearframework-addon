@@ -260,7 +260,7 @@ if ($hasElementID) {
 }
 
 $class = (string) $component->class;
-if (isset($class{0})) {
+if (isset($class[0])) {
     $containerAttributes .= ' class="' . htmlentities($class) . '"';
 }
 ?><html>
@@ -271,7 +271,7 @@ if (isset($class{0})) {
         if ($hasResponsiveAttributes) {
             echo '<link rel="client-packages-embed" name="-ivopetkov-image-gallery-responsive-attributes">';
         }
-        if (isset($containerStyle{0})) {
+        if (isset($containerStyle[0])) {
             echo '<style>' . $containerStyle . '</style>';
         }
         ?></head>
@@ -294,11 +294,11 @@ if (isset($class{0})) {
         }
         foreach ($files as $index => $file) {
             $class = (string) $file->getAttribute('class');
-            $classAttribute = isset($class{0}) ? ' class="' . htmlentities($class) . '"' : '';
+            $classAttribute = isset($class[0]) ? ' class="' . htmlentities($class) . '"' : '';
             $alt = (string) $file->getAttribute('alt');
-            $altAttribute = isset($alt{0}) ? ' alt="' . htmlentities($alt) . '"' : '';
+            $altAttribute = isset($alt[0]) ? ' alt="' . htmlentities($alt) . '"' : '';
             $title = (string) $file->getAttribute('title');
-            $titleAttribute = isset($title{0}) ? ' title="' . htmlentities($title) . '"' : '';
+            $titleAttribute = isset($title[0]) ? ' title="' . htmlentities($title) . '"' : '';
             if ($internalOptionRenderImageContainer) {
                 echo '<div>';
             }
@@ -311,10 +311,10 @@ if (isset($class{0})) {
                 echo '<a' . $titleAttribute . ' onclick="' . htmlentities($imageOnClick) . '" style="cursor:pointer;">';
             } elseif ($onClick === 'url') {
                 $url = (string) $file->getAttribute('url');
-                echo '<a' . $titleAttribute . ' href="' . (isset($url{0}) ? htmlentities($url) : '#') . '">';
+                echo '<a' . $titleAttribute . ' href="' . (isset($url[0]) ? htmlentities($url) : '#') . '">';
             } elseif ($onClick === 'custom') {
                 $onClick = (string) $file->getAttribute('onClick');
-                echo '<a' . $titleAttribute . ' onclick="' . htmlentities(isset($onClick{0})) . '" style="cursor:pointer;">';
+                echo '<a' . $titleAttribute . ' onclick="' . htmlentities(isset($onClick[0])) . '" style="cursor:pointer;">';
             }
             $filename = (string) $file->getAttribute('filename');
             if ($lazyLoadImages) {
