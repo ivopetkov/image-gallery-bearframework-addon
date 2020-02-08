@@ -62,17 +62,17 @@ $getImagesSizes = function($filenames) use ($app) {
     if (empty($filenames)) {
         return [];
     }
-    $cacheKey = 'image-gallery-images-sizes-' . md5(serialize($filenames));
-    $cachedData = $app->cache->getValue($cacheKey);
-    if ($cachedData !== null) {
-        return json_decode($cachedData, true);
-    }
+    // $cacheKey = 'image-gallery-images-sizes-' . md5(serialize($filenames));
+    // $cachedData = $app->cache->getValue($cacheKey);
+    // if ($cachedData !== null) {
+    //     return json_decode($cachedData, true);
+    // }
     $result = [];
     foreach ($filenames as $index => $filename) {
         $details = $app->assets->getDetails($filename, ['width', 'height']);
         $result[$index] = [$details['width'], $details['height']];
     }
-    $app->cache->set($app->cache->make($cacheKey, json_encode($result)));
+    //$app->cache->set($app->cache->make($cacheKey, json_encode($result)));
     return $result;
 };
 

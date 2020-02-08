@@ -34,19 +34,19 @@ $app->serverRequests
                     $result = [];
                     $filenames = $encryptedServerData[1];
                     $getImageSize = function($filename) use ($app) {
-                        $cacheKey = 'image-gallery-image-size-' . $filename;
-                        $cachedData = $app->cache->getValue($cacheKey);
-                        if ($cachedData !== null) {
-                            $size = json_decode($cachedData, true);
-                            return $size;
-                        }
+                        // $cacheKey = 'image-gallery-image-size-' . $filename;
+                        // $cachedData = $app->cache->getValue($cacheKey);
+                        // if ($cachedData !== null) {
+                        //     $size = json_decode($cachedData, true);
+                        //     return $size;
+                        // }
                         try {
                             $details = $app->assets->getDetails($filename, ['width', 'height']);
                             $size = [$details['width'], $details['height']];
                         } catch (\Exception $e) {
                             $size = [1, 1];
                         }
-                        $app->cache->set($app->cache->make($cacheKey, json_encode($size)));
+                        //$app->cache->set($app->cache->make($cacheKey, json_encode($size)));
                         return $size;
                     };
 
