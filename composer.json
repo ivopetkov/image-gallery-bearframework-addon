@@ -1,7 +1,11 @@
 {
     "name": "ivopetkov/image-gallery-bearframework-addon",
     "description": "Image gallery addon for Bear Framework",
-    "keywords": ["gallery", "responsive image", "Bear Framework addon"],
+    "keywords": [
+        "gallery",
+        "responsive image",
+        "Bear Framework addon"
+    ],
     "homepage": "https://github.com/ivopetkov/image-gallery-bearframework-addon",
     "license": "MIT",
     "authors": [
@@ -14,19 +18,20 @@
     "require": {
         "php": ">=7.1.0",
         "bearframework/bearframework": "1.*",
-        "ivopetkov/html-server-components-bearframework-addon": "0.2.*|0.3.*|0.4.*|0.5.*|0.6.*|0.7.*|0.8.*",
-        "ivopetkov/lazy-image-bearframework-addon": "0.2.*",
-        "ivopetkov/js-lightbox-bearframework-addon": "0.5.*",
+        "ivopetkov/html-server-components-bearframework-addon": "1.*",
+        "ivopetkov/lazy-image-bearframework-addon": "1.*",
+        "ivopetkov/js-lightbox-bearframework-addon": "1.*",
         "ivopetkov/html5-dom-document-php": "2.*",
-        "ivopetkov/server-requests-bearframework-addon": "0.4.*",
-        "ivopetkov/encryption-bearframework-addon": "0.1.*",
-        "ivopetkov/client-packages-bearframework-addon": "0.2.*"
+        "ivopetkov/server-requests-bearframework-addon": "1.*",
+        "ivopetkov/encryption-bearframework-addon": "1.*",
+        "ivopetkov/client-packages-bearframework-addon": "1.*"
     },
     "require-dev": {
-        "bearframework/addon-tests": "0.3.*",
-        "phpunit/phpunit": "7.*"
+        "bearframework/addon-tests": "1.*"
     },
     "autoload": {
-        "files": ["autoload.php"]
+        "files": [
+            "autoload.php"
+        ]
     }
 }
