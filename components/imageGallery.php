@@ -55,6 +55,11 @@ if ($component->lazyLoadImages === 'true') {
     $lazyLoadImages = true;
 }
 
+$maxImageSize = (int)$component->maxImageSize;
+if ($maxImageSize === 0) {
+    $maxImageSize = null;
+}
+
 $galleryID = 'imggallery' . uniqid();
 $containerAttributes = '';
 
@@ -78,7 +83,7 @@ $getImagesSizes = function ($filenames) use ($app) {
 
 if ($onClick === 'fullscreen') {
     $hasLightbox = true;
-    $serverData = ['imagegallery', []];
+    $serverData = ['imagegallery', [], $maxImageSize];
     foreach ($files as $file) {
         $serverData[1][] = $file->getAttribute('filename');
     }
@@ -320,7 +325,7 @@ if (isset($class[0])) {
         }
         $filename = (string) $file->getAttribute('filename');
         if ($lazyLoadImages) {
-            echo '<component src="lazy-image"' . $classAttribute . $altAttribute . $titleAttribute . ' filename="' . htmlentities($filename) . '"' . $imageAttributes . '/>';
+            echo '<component src="lazy-image"' . $classAttribute . $altAttribute . $titleAttribute . ' filename="' . htmlentities($filename) . '" maxSize="' . $maxImageSize . '"' . $imageAttributes . '/>';
         } else {
             $options = [];
             $options['cacheMaxAge'] = 999999999;
