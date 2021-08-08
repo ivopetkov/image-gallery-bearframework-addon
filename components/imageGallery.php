@@ -25,7 +25,7 @@ $files = $domDocument->querySelectorAll('file');
 $type = 'columns';
 $temp = (string) $component->type;
 if ($temp !== '') {
-    if (array_search($temp, ['columns', 'grid']) !== false) {
+    if (array_search($temp, ['columns', 'grid', 'firstBig']) !== false) {
         $type = $temp;
     }
 }
@@ -250,14 +250,27 @@ if ($type === 'columns') {
     }
     $responsiveAttributes[] = 'w>=' . $maxGridImageWidth . '=>data-grid=' . $maxGridImageWidth;
     $containerAttributes .= ' data-responsive-attributes="' . implode(',', $responsiveAttributes) . '"';
-}
+} elseif ($type === 'firstBig') {
+    $hasElementID = true;
+    $containerStyle .= '#' . $galleryID . '>div:first-child{display:block;width:100%;}';
 
-$imageAttributes = '';
-if ($imageAspectRatio !== null) {
-    $imageAttributes .= ' aspectRatio="' . $imageAspectRatio . '"';
-}
-if ($imageLoadingBackground !== null) {
-    $imageAttributes .= ' loadingBackground="' . $imageLoadingBackground . '"';
+    $responsiveAttributes = [];
+    $responsiveAttributes[] = 'w<' . (100) . '=>data-columns=1';
+    $responsiveAttributes[] = 'w>=' . (100) . '&&w<' . (100 * 2) . '=>data-columns=2';
+    $responsiveAttributes[] = 'w>=' . (100 * 2) . '&&w<' . (100 * 3) . '=>data-columns=3';
+    $responsiveAttributes[] = 'w>=' . (100 * 3) . '&&w<' . (100 * 4.3) . '=>data-columns=4';
+    $responsiveAttributes[] = 'w>=' . (100 * 4.3) . '&&w<' . (100 * 6) . '=>data-columns=5';
+    $responsiveAttributes[] = 'w>=' . (100 * 6) . '=>data-columns=6';
+    $containerAttributes .= ' data-responsive-attributes="' . implode(',', $responsiveAttributes) . '"';
+
+    for ($columnsCount = 1; $columnsCount <= 6; $columnsCount++) {
+        $attributeSelector = '[data-columns="' . $columnsCount . '"]';
+        $containerStyle .= '#' . $galleryID . $attributeSelector . '>div:not(:first-child){display:inline-block;width:calc((100% - ' . $spacing . '/2*' . ($columnsCount - 1) . ')/' . $columnsCount . ');margin-right:calc(' . $spacing . '/2);margin-top:calc(' . $spacing . '/2);}';
+        $containerStyle .= '#' . $galleryID . $attributeSelector . '>div:nth-child(' . $columnsCount . 'n + 1){margin-right:0;}';
+        for ($i = 1; $i <= $columnsCount; $i++) {
+            $containerStyle .= '#' . $galleryID . $attributeSelector . '>div:nth-child(' . $i . ' + 1){margin-top:0;}';
+        }
+    }
 }
 
 if ($hasElementID) {
@@ -268,102 +281,111 @@ $class = (string) $component->class;
 if (isset($class[0])) {
     $containerAttributes .= ' class="' . htmlentities($class) . '"';
 }
-?><html>
+echo '<html>';
 
-<head><?php
-        if ($hasLightbox) {
-            echo '<link rel="client-packages-embed" name="lightbox">';
-        }
-        if ($hasResponsiveAttributes) {
-            echo '<link rel="client-packages-embed" name="-ivopetkov-image-gallery-responsive-attributes">';
-        }
-        if (isset($containerStyle[0])) {
-            echo '<style>' . $containerStyle . '</style>';
-        }
-        ?></head>
+echo '<head>';
+if ($hasLightbox) {
+    echo '<link rel="client-packages-embed" name="lightbox">';
+}
+if ($hasResponsiveAttributes) {
+    echo '<link rel="client-packages-embed" name="-ivopetkov-image-gallery-responsive-attributes">';
+}
+if (isset($containerStyle[0])) {
+    echo '<style>' . $containerStyle . '</style>';
+}
+echo '</head>';
 
-<body>
-    <?php
-    if ($hasLightbox) {
-        echo '<script>';
-        echo 'window.' . $galleryID . '=' . json_encode($jsData) . ';';
-        echo '</script>';
-    }
-    if ($internalOptionRenderContainer) {
-        echo '<div' . $containerAttributes . '>';
-    }
-    if (!$lazyLoadImages && $imageAspectRatio !== null) {
-        $filenames = [];
-        foreach ($files as $index => $file) {
-            $filenames[] = (string) $file->getAttribute('filename');
-        }
-        $filesSizes = $getImagesSizes($filenames);
-    }
+echo '<body>';
+if ($hasLightbox) {
+    echo '<script>';
+    echo 'window.' . $galleryID . '=' . json_encode($jsData) . ';';
+    echo '</script>';
+}
+if ($internalOptionRenderContainer) {
+    echo '<div' . $containerAttributes . '>';
+}
+if (!$lazyLoadImages && ($imageAspectRatio !== null || $type === 'firstBig')) {
+    $filenames = [];
     foreach ($files as $index => $file) {
-        $class = (string) $file->getAttribute('class');
-        $classAttribute = isset($class[0]) ? ' class="' . htmlentities($class) . '"' : '';
-        $alt = (string) $file->getAttribute('alt');
-        $altAttribute = isset($alt[0]) ? ' alt="' . htmlentities($alt) . '"' : '';
-        $title = (string) $file->getAttribute('title');
-        $titleAttribute = isset($title[0]) ? ' title="' . htmlentities($title) . '"' : '';
-        if ($internalOptionRenderImageContainer) {
-            echo '<div>';
-        }
-        if ($onClick === 'fullscreen') {
-            $imageOnClick = 'clientPackages.get(\'lightbox\').then(function(lightbox){var context=lightbox.make();' .
-                'clientPackages.get(\'-ivopetkov-image-gallery-lightbox\').then(function(imageGalleryLightbox){' .
-                'imageGalleryLightbox.open(context,window.' . $galleryID . ',' . $index . ');' .
-                '})' .
-                '});';
-            echo '<a' . $titleAttribute . ' onclick="' . htmlentities($imageOnClick) . '" style="cursor:pointer;">';
-        } elseif ($onClick === 'url') {
-            $url = (string) $file->getAttribute('url');
-            echo '<a' . $titleAttribute . ' href="' . (isset($url[0]) ? htmlentities($url) : '#') . '">';
-        } elseif ($onClick === 'custom') {
-            $onClick = (string) $file->getAttribute('onClick');
-            echo '<a' . $titleAttribute . ' onclick="' . htmlentities(isset($onClick[0])) . '" style="cursor:pointer;">';
-        }
-        $filename = (string) $file->getAttribute('filename');
-        if ($lazyLoadImages) {
-            echo '<component src="lazy-image"' . $classAttribute . $altAttribute . $titleAttribute . ' filename="' . htmlentities($filename) . '" maxSize="' . $maxImageSize . '"' . $imageAttributes . '/>';
-        } else {
-            $options = [];
-            $options['cacheMaxAge'] = 999999999;
-            $options['version'] = 1;
-            if ($imageAspectRatio !== null) {
-                $imageAspectRatioParts = explode(':', $imageAspectRatio);
-                list($imageWidth, $imageHeight) = $filesSizes[$index];
-                $newImageHeight = $imageWidth * $imageAspectRatioParts[1] / $imageAspectRatioParts[0];
-                if ($imageWidth !== null && $imageHeight !== null) {
-                    if ($newImageHeight > $imageHeight) {
-                        $options['width'] = (int) ($imageHeight * $imageAspectRatioParts[0] / $imageAspectRatioParts[1]);
-                        $options['height'] = $imageHeight;
-                    } else {
-                        $options['width'] = $imageWidth;
-                        $options['height'] = $newImageHeight;
-                    }
-                }
-                $imageUrl = $app->assets->getURL($filename, $options);
-            } else {
-                $imageUrl = $app->assets->getURL($filename);
-            }
-            echo '<img' . $classAttribute . $altAttribute . $titleAttribute . ' style="max-width:100%;" src="' . $imageUrl . '"/>';
-        }
-
-        if ($onClick === 'fullscreen' || $onClick === 'url' || $onClick === 'custom') {
-            echo '</a>';
-        }
-        if ($internalOptionRenderImageContainer) {
-            echo '</div>';
-        }
+        $filenames[] = (string) $file->getAttribute('filename');
     }
-    if ($internalOptionRenderContainer) {
+    $filesSizes = $getImagesSizes($filenames);
+}
+foreach ($files as $index => $file) {
+    $class = (string) $file->getAttribute('class');
+    $classAttribute = isset($class[0]) ? ' class="' . htmlentities($class) . '"' : '';
+    $alt = (string) $file->getAttribute('alt');
+    $altAttribute = isset($alt[0]) ? ' alt="' . htmlentities($alt) . '"' : '';
+    $title = (string) $file->getAttribute('title');
+    $titleAttribute = isset($title[0]) ? ' title="' . htmlentities($title) . '"' : '';
+    if ($internalOptionRenderImageContainer) {
+        echo '<div>';
+    }
+    if ($onClick === 'fullscreen') {
+        $imageOnClick = 'clientPackages.get(\'lightbox\').then(function(lightbox){var context=lightbox.make();' .
+            'clientPackages.get(\'-ivopetkov-image-gallery-lightbox\').then(function(imageGalleryLightbox){' .
+            'imageGalleryLightbox.open(context,window.' . $galleryID . ',' . $index . ');' .
+            '})' .
+            '});';
+        echo '<a' . $titleAttribute . ' onclick="' . htmlentities($imageOnClick) . '" style="cursor:pointer;">';
+    } elseif ($onClick === 'url') {
+        $url = (string) $file->getAttribute('url');
+        echo '<a' . $titleAttribute . ' href="' . (isset($url[0]) ? htmlentities($url) : '#') . '">';
+    } elseif ($onClick === 'custom') {
+        $onClick = (string) $file->getAttribute('onClick');
+        echo '<a' . $titleAttribute . ' onclick="' . htmlentities(isset($onClick[0])) . '" style="cursor:pointer;">';
+    }
+    $currentImageAspectRatio = $imageAspectRatio;
+    if ($type === 'firstBig' && $index > 0) {
+        $currentImageAspectRatio = '1:1';
+    }
+    $filename = (string) $file->getAttribute('filename');
+    if ($lazyLoadImages) {
+        $imageAttributes = '';
+        if ($currentImageAspectRatio !== null) {
+            $imageAttributes .= ' aspectRatio="' . $currentImageAspectRatio . '"';
+        }
+        if ($imageLoadingBackground !== null) {
+            $imageAttributes .= ' loadingBackground="' . $imageLoadingBackground . '"';
+        }
+        echo '<component src="lazy-image"' . $classAttribute . $altAttribute . $titleAttribute . ' filename="' . htmlentities($filename) . '" maxSize="' . $maxImageSize . '"' . $imageAttributes . '/>';
+    } else {
+        $options = [];
+        $options['cacheMaxAge'] = 999999999;
+        $options['version'] = 1;
+        if ($currentImageAspectRatio !== null) {
+            $imageAspectRatioParts = explode(':', $currentImageAspectRatio);
+            list($imageWidth, $imageHeight) = $filesSizes[$index];
+            $newImageHeight = $imageWidth * $imageAspectRatioParts[1] / $imageAspectRatioParts[0];
+            if ($imageWidth !== null && $imageHeight !== null) {
+                if ($newImageHeight > $imageHeight) {
+                    $options['width'] = (int) ($imageHeight * $imageAspectRatioParts[0] / $imageAspectRatioParts[1]);
+                    $options['height'] = $imageHeight;
+                } else {
+                    $options['width'] = $imageWidth;
+                    $options['height'] = $newImageHeight;
+                }
+            }
+            $imageUrl = $app->assets->getURL($filename, $options);
+        } else {
+            $imageUrl = $app->assets->getURL($filename);
+        }
+        echo '<img' . $classAttribute . $altAttribute . $titleAttribute . ' style="max-width:100%;" src="' . $imageUrl . '"/>';
+    }
+
+    if ($onClick === 'fullscreen' || $onClick === 'url' || $onClick === 'custom') {
+        echo '</a>';
+    }
+    if ($internalOptionRenderImageContainer) {
         echo '</div>';
     }
-    if ($hasResponsiveAttributes) {
-        echo '<script>clientPackages.get(\'-ivopetkov-image-gallery-responsive-attributes\').then(function(responsiveAttributes){responsiveAttributes.run();})</script>';
-    }
-    ?>
-</body>
+}
+if ($internalOptionRenderContainer) {
+    echo '</div>';
+}
+if ($hasResponsiveAttributes) {
+    echo '<script>clientPackages.get(\'-ivopetkov-image-gallery-responsive-attributes\').then(function(responsiveAttributes){responsiveAttributes.run();})</script>';
+}
+echo '</body>';
 
-</html>
+echo '</html>';
