@@ -311,7 +311,7 @@ foreach ($files as $index => $file) {
         echo '<div>';
     }
     if ($onClick === 'fullscreen') {
-        $imageOnClick = 'clientPackages.get(\'lightbox\').then(function(lightbox){var context=lightbox.make();' .
+        $imageOnClick = 'clientPackages.get(\'lightbox\').then(function(lightbox){var context=lightbox.make({showCloseButton:false});' .
             'clientPackages.get(\'-ivopetkov-image-gallery-lightbox\').then(function(imageGalleryLightbox){' .
             'imageGalleryLightbox.open(context,window.' . $galleryID . ',' . $index . ');' .
             '})' .

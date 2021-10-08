@@ -12,8 +12,8 @@ ivoPetkov.bearFrameworkAddons = ivoPetkov.bearFrameworkAddons || {};
 ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddons.imageGalleryLightbox || (function () {
 
     var calculateImageWidth = function (width, height) {
-        var maxWidth = window.innerWidth - 15 * 2;
-        var maxHeight = window.innerHeight - 15 * 2;
+        var maxWidth = window.innerWidth - 5 * 2;
+        var maxHeight = window.innerHeight - 5 * 2;
         if (height > maxHeight) {
             width = maxHeight / height * width;
         }
@@ -62,21 +62,20 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
                     html += '<div class="swiper-wrapper">';
                     for (var i = 0; i < imagesCount; i++) {
                         var image = images[i];
-                        html += '<div class="swiper-slide" style="padding:15px;box-sizing:border-box;display:-ms-flexbox;display:-webkit-flex;display:flex;-ms-flex-align:center;-webkit-align-items:center;-webkit-box-align:center;align-items:center;-moz-justify-content:center;-webkit-justify-content:center;justify-content:center;">';
-                        html += '<div data-max-width="' + image[0] + '" data-max-height="' + image[1] + '" style="width:' + calculateImageWidth(image[0], image[1]) + 'px;"></div>';
+                        html += '<div class="swiper-slide" style="padding:5px;box-sizing:border-box;display:-ms-flexbox;display:-webkit-flex;display:flex;-ms-flex-align:center;-webkit-align-items:center;-webkit-box-align:center;align-items:center;-moz-justify-content:center;-webkit-justify-content:center;justify-content:center;">';
+                        html += '<div data-max-width="' + image[0] + '" data-max-height="' + image[1] + '" style="width:' + calculateImageWidth(image[0], image[1]) + 'px;font-size:0;line-height:0;"></div>';
                         html += '</div>';
                     }
                     html += '</div>';
 
                     html += '<div style="z-index:10010001;position:fixed;top:0;left:0;">';
-                    var buttonStyle = 'display:none;overflow:hidden;width:42px;height:42px;position:fixed;top:calc((100% - 42px)/2);cursor:pointer;align-items:center;justify-content:center;';
-                    var innerStyle = 'display:block;width:0;height:0;border-style:solid;';
-                    html += '<span style="right:0;' + buttonStyle + '"><span style="' + innerStyle + 'border-width:15px 0 15px 15px;border-color:transparent transparent transparent rgba(255,255,255,0.8);"></span></span>';
-                    html += '<span style="left:0;' + buttonStyle + '"><span style="' + innerStyle + 'border-width:15px 15px 15px 0;border-color:transparent rgba(255,255,255,0.8) transparent transparent;"></span></span>';
+                    html += '<span data-image-gallery-button="next"></span>';
+                    html += '<span data-image-gallery-button="previous"></span>';
+                    html += '<span data-image-gallery-button="close"></span>';
                     html += '</div>';
 
                     html += '</div>';
-                    lightbox.open(html, {'spacing': '0px'}).then(function () {
+                    lightbox.open(html, { 'spacing': '0px', showCloseButton: false }).then(function () {
                         var container = document.getElementById(containerID);
 
                         for (var i = 0; i < imagesCount; i++) {
@@ -96,6 +95,8 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
                         nextButton.addEventListener('click', swiperObject.slideNext);
                         var previousButton = container.childNodes[1].childNodes[1];
                         previousButton.addEventListener('click', swiperObject.slidePrev);
+                        var closeButton = container.childNodes[1].childNodes[2];
+                        closeButton.addEventListener('click', lightbox.close);
 
                         var updateButtons = function (index) {
                             if (imagesCount < 2) {
@@ -108,9 +109,6 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
                         swiperObject.on('slideChangeStart', function (swiper) {
                             updateButtons(swiper.activeIndex);
                         });
-//                    swiperObject.on('slideChangeEnd', function (swiper) {
-//                        
-//                    });
                         updateButtons(index);
                     });
                 });
@@ -121,7 +119,7 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
             showResponse(cachedDataResponses[serverData]);
         } else {
             clientPackages.get('serverRequests').then(function (serverRequests) {
-                serverRequests.send('-ivopetkov-image-gallery-get-images', {'serverData': serverData}).then(function (responseText) {
+                serverRequests.send('-ivopetkov-image-gallery-get-images', { 'serverData': serverData }).then(function (responseText) {
                     cachedDataResponses[serverData] = responseText;
                     showResponse(responseText);
                 });
@@ -129,12 +127,6 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
         }
 
     };
-
-//    var onShow = function (index) {
-//        if (typeof responsivelyLazy !== 'undefined') {
-//            responsivelyLazy.run();
-//        }
-//    };
 
     return {
         'open': open
