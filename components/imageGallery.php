@@ -67,17 +67,11 @@ $getImagesSizes = function ($filenames) use ($app) {
     if (empty($filenames)) {
         return [];
     }
-    // $cacheKey = 'image-gallery-images-sizes-' . md5(serialize($filenames));
-    // $cachedData = $app->cache->getValue($cacheKey);
-    // if ($cachedData !== null) {
-    //     return json_decode($cachedData, true);
-    // }
     $result = [];
     foreach ($filenames as $index => $filename) {
         $details = $app->assets->getDetails($filename, ['width', 'height']);
         $result[$index] = [$details['width'], $details['height']];
     }
-    //$app->cache->set($app->cache->make($cacheKey, json_encode($result)));
     return $result;
 };
 
@@ -88,11 +82,6 @@ if ($onClick === 'fullscreen') {
         $serverData[1][] = $file->getAttribute('filename');
     }
     $serverData = json_encode($serverData);
-    //    $jsData = [
-    //        'galleryID' => $galleryID,
-    //        'serverData' => md5($serverData) . base64_encode($app->encryption->encrypt(gzcompress($serverData))),
-    //        'imagesCount' => $files->length
-    //    ];
     $jsData = md5($serverData) . base64_encode($app->encryption->encrypt(gzcompress($serverData)));
 }
 
