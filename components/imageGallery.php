@@ -307,6 +307,8 @@ foreach ($files as $index => $file) {
     $altAttribute = isset($alt[0]) ? ' alt="' . htmlentities($alt) . '"' : '';
     $title = (string) $file->getAttribute('title');
     $titleAttribute = isset($title[0]) ? ' title="' . htmlentities($title) . '"' : '';
+    $quality = $file->getAttribute('quality');
+    $quality = strlen($quality) === 0 ? null : (int)$quality;
     if ($internalOptionRenderImageContainer) {
         echo '<div>';
     }
@@ -337,28 +339,31 @@ foreach ($files as $index => $file) {
         if ($imageLoadingBackground !== null) {
             $imageAttributes .= ' loadingBackground="' . $imageLoadingBackground . '"';
         }
+        if ($quality !== null) {
+            $imageAttributes .= ' quality="' . $quality . '"';
+        }
         echo '<component src="lazy-image"' . $classAttribute . $altAttribute . $titleAttribute . ' filename="' . htmlentities($filename) . '" maxSize="' . $maxImageSize . '"' . $imageAttributes . '/>';
     } else {
-        $options = [];
-        $options['cacheMaxAge'] = 999999999;
-        $options['version'] = 1;
+        $assetOptions = [];
+        $assetOptions['cacheMaxAge'] = 999999999;
         if ($currentImageAspectRatio !== null) {
             $imageAspectRatioParts = explode(':', $currentImageAspectRatio);
             list($imageWidth, $imageHeight) = $filesSizes[$index];
             $newImageHeight = $imageWidth * $imageAspectRatioParts[1] / $imageAspectRatioParts[0];
             if ($imageWidth !== null && $imageHeight !== null) {
                 if ($newImageHeight > $imageHeight) {
-                    $options['width'] = (int) ($imageHeight * $imageAspectRatioParts[0] / $imageAspectRatioParts[1]);
-                    $options['height'] = $imageHeight;
+                    $assetOptions['width'] = (int) ($imageHeight * $imageAspectRatioParts[0] / $imageAspectRatioParts[1]);
+                    $assetOptions['height'] = $imageHeight;
                 } else {
-                    $options['width'] = $imageWidth;
-                    $options['height'] = $newImageHeight;
+                    $assetOptions['width'] = $imageWidth;
+                    $assetOptions['height'] = $newImageHeight;
                 }
             }
-            $imageUrl = $app->assets->getURL($filename, $options);
-        } else {
-            $imageUrl = $app->assets->getURL($filename);
         }
+        if ($quality !== null) {
+            $assetOptions['quality'] = $quality;
+        }
+        $imageUrl = $app->assets->getURL($filename, $assetOptions);
         echo '<img' . $classAttribute . $altAttribute . $titleAttribute . ' style="max-width:100%;" src="' . $imageUrl . '"/>';
     }
 
