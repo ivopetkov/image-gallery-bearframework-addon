@@ -241,6 +241,7 @@ if ($type === 'columns') {
     $containerAttributes .= ' data-responsive-attributes="' . implode(',', $responsiveAttributes) . '"';
 } elseif ($type === 'firstBig') {
     $hasElementID = true;
+    $hasResponsiveAttributes = true;
     $containerStyle .= '#' . $galleryID . '>div:first-child{display:block;width:100%;}';
 
     $responsiveAttributes = [];
