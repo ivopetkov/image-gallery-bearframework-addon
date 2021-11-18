@@ -34,24 +34,16 @@ $app->serverRequests
             $encryptedServerData = json_decode($encryptedServerData, true);
             if (is_array($encryptedServerData) && isset($encryptedServerData[0], $encryptedServerData[1]) && $encryptedServerData[0] === 'imagegallery') {
                 $result = [];
-                $filenames = $encryptedServerData[1];
+                $files = $encryptedServerData[1];
                 $maxImageSize = isset($encryptedServerData[2]) ? (int)$encryptedServerData[2] : null;
                 if ($maxImageSize === 0) {
                     $maxImageSize = null;
                 }
-                $getImageSize = function ($filename) use ($app) {
-                    try {
-                        $details = $app->assets->getDetails($filename, ['width', 'height']);
-                        $size = [$details['width'], $details['height']];
-                    } catch (\Exception $e) {
-                        $size = [1, 1];
-                    }
-                    return $size;
-                };
-
-                foreach ($filenames as $filename) {
-                    $html = $app->components->process('<component style="background-color:#000;" src="lazy-image" filename="' . $filename . '" maxSize="' . $maxImageSize . '"/>');
-                    list($imageWidth, $imageHeight) = $getImageSize($filename);
+                foreach ($files as $file) {
+                    $filename = $file[0];
+                    $imageWidth = $file[1];
+                    $imageHeight = $file[2];
+                    $html = $app->components->process('<component style="background-color:#000;" src="lazy-image" filename="' . htmlentities($filename) . '" fileWidth="' . $imageWidth . '" fileHeight="' . $imageHeight . '" maxSize="' . $maxImageSize . '"/>');
                     if ($maxImageSize !== null) {
                         if ($imageWidth > $maxImageSize) {
                             $imageHeight = floor($maxImageSize / $imageWidth * $imageHeight);

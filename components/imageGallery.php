@@ -18,42 +18,48 @@ $hasElementID = false;
 $internalOptionRenderContainer = $component->getAttribute('internal-option-render-container') !== 'false';
 $internalOptionRenderImageContainer = $component->getAttribute('internal-option-render-image-container') !== 'false';
 
+$files = [];
 $domDocument = new HTML5DOMDocument();
 $domDocument->loadHTML($component->innerHTML, HTML5DOMDocument::ALLOW_DUPLICATE_IDS);
-$files = $domDocument->querySelectorAll('file');
-
-$type = 'columns';
-$temp = (string) $component->type;
-if ($temp !== '') {
-    if (array_search($temp, ['columns', 'grid', 'firstBig']) !== false) {
-        $type = $temp;
+$fileElements = $domDocument->querySelectorAll('file');
+foreach ($fileElements as $index => $fileElement) {
+    $filename = (string) $fileElement->getAttribute('filename');
+    $fileWidth = (string) $fileElement->getAttribute('filewidth');
+    $fileHeight = (string) $fileElement->getAttribute('fileheight');
+    if ($fileWidth === '' || $fileHeight === '') {
+        $details = $app->assets->getDetails($filename, ['width', 'height']);
+        $fileWidth = $details['width'] !== null ? $details['width'] : null;
+        $fileHeight = $details['height'] !== null ? $details['height'] : null;
     }
+    $files[] = [
+        'filename' => $filename,
+        'width' => (int)$fileWidth,
+        'height' => (int)$fileHeight,
+        'element' => $fileElement
+    ];
 }
 
-$onClick = 'fullscreen';
-$temp = (string) $component->onClick;
-if ($temp !== '') {
-    if (array_search($temp, ['fullscreen', 'url', 'custom', 'none']) !== false) {
-        $onClick = $temp;
-    }
+$type = (string) $component->type;
+if (array_search($type, ['columns', 'grid', 'firstBig']) === false) {
+    $type = 'columns';
 }
 
-$imageLoadingBackground = null;
-$temp = (string) $component->imageLoadingBackground;
-if ($temp !== '') {
-    $imageLoadingBackground = $temp;
+$onClick = (string) $component->onClick;
+if (array_search($onClick, ['fullscreen', 'url', 'custom', 'none']) === false) {
+    $onClick = 'fullscreen';
 }
 
-$spacing = '0px';
-$temp = (string) $component->spacing;
-if ($temp !== '') {
-    $spacing = $temp;
+$imageLoadingBackground = (string) $component->imageLoadingBackground;
+if ($imageLoadingBackground === '') {
+    $imageLoadingBackground = null;
 }
 
-$lazyLoadImages = false;
-if ($component->lazyLoadImages === 'true') {
-    $lazyLoadImages = true;
+$spacing = (string) $component->spacing;
+if ($spacing === '') {
+    $spacing = '0px';
 }
+
+$lazyLoadImages = $component->lazyLoadImages === 'true';
 
 $maxImageSize = (int)$component->maxImageSize;
 if ($maxImageSize === 0) {
@@ -63,23 +69,11 @@ if ($maxImageSize === 0) {
 $galleryID = 'imggallery' . uniqid();
 $containerAttributes = '';
 
-$getImagesSizes = function ($filenames) use ($app) {
-    if (empty($filenames)) {
-        return [];
-    }
-    $result = [];
-    foreach ($filenames as $index => $filename) {
-        $details = $app->assets->getDetails($filename, ['width', 'height']);
-        $result[$index] = [$details['width'], $details['height']];
-    }
-    return $result;
-};
-
 if ($onClick === 'fullscreen') {
     $hasLightbox = true;
     $serverData = ['imagegallery', [], $maxImageSize];
     foreach ($files as $file) {
-        $serverData[1][] = $file->getAttribute('filename');
+        $serverData[1][] = [$file['filename'], $file['width'], $file['height']];
     }
     $serverData = json_encode($serverData);
     $jsData = md5($serverData) . base64_encode($app->encryption->encrypt(gzcompress($serverData)));
@@ -90,30 +84,21 @@ $imageAspectRatio = null;
 $containerStyle = '';
 if ($type === 'columns') {
 
-    $columnsCount = 'auto';
-    $temp = (string) $component->columnsCount;
-    if ($temp !== '') {
-        if (is_numeric($temp)) {
-            $temp = (int) $temp;
-            if ($temp >= 1 && $temp <= 20) {
-                $columnsCount = $temp;
-            }
-        }
+    $columnsCount = (string) $component->columnsCount;
+    if (is_numeric($columnsCount) && ((int)$columnsCount >= 1 && (int)$columnsCount <= 20)) {
+        $columnsCount = (int)$columnsCount;
+    } else {
+        $columnsCount = 'auto';
     }
 
-    $imageSize = 'medium';
-    $temp = (string) $component->imageSize;
-    if ($temp !== '') {
-        if (array_search($temp, ['tiny', 'small', 'medium', 'large', 'huge']) !== false) {
-            $imageSize = $temp;
-        }
+    $imageSize = (string) $component->imageSize;
+    if (array_search($imageSize, ['tiny', 'small', 'medium', 'large', 'huge']) === false) {
+        $imageSize = 'medium';
     }
 
-    $temp = (string) $component->imageAspectRatio;
-    if ($temp !== '') {
-        if (preg_match('/^[0-9\.]+:[0-9\.]+$/', $temp) === 1) {
-            $imageAspectRatio = $temp;
-        }
+    $imageAspectRatio = (string) $component->imageAspectRatio;
+    if (preg_match('/^[0-9\.]+:[0-9\.]+$/', $imageAspectRatio) !== 1) {
+        $imageAspectRatio = null;
     }
 
     $getColumnsStyle = function ($columnsCount, $attributeSelector = '') use ($galleryID, $spacing) {
@@ -159,7 +144,6 @@ if ($type === 'columns') {
     $containerStyle .= '#' . $galleryID . '{opacity:0;}';
     $containerStyle .= '#' . $galleryID . '[data-grid]{opacity:1;}';
 
-    $imageSize = 'medium';
     $maxHeights = [
         'tiny' => 90,
         'small' => 150,
@@ -167,22 +151,14 @@ if ($type === 'columns') {
         'large' => 300,
         'huge' => 400
     ];
-    $temp = (string) $component->imageSize;
-    if ($temp !== '') {
-        if (isset($maxHeights[$temp])) {
-            $imageSize = $temp;
-        }
+    $imageSize = (string) $component->imageSize;
+    if (!isset($maxHeights[$imageSize])) {
+        $imageSize = 'medium';
     }
+    $maxHeight = $maxHeights[$imageSize];
 
     $hasResponsiveAttributes = true;
     $hasElementID = true;
-    $maxHeight = $maxHeights[$imageSize];
-
-    $filenames = [];
-    foreach ($files as $index => $file) {
-        $filenames[] = (string) $file->getAttribute('filename');
-    }
-    $filesSizes = $getImagesSizes($filenames);
 
     $addFilesToRow = function ($attributeSelector, $filesOnRow, $isLastRow) use ($galleryID, &$containerStyle, $spacing) {
         $totalWidth = array_sum($filesOnRow);
@@ -194,9 +170,7 @@ if ($type === 'columns') {
             if ($counter < $filesOnRowCount) {
                 $style .= 'margin-right:' . $spacing . ';';
             }
-            //if ($filesOnRowCount === 1) {
-            $style .= 'max-width:' . ($width * 1.1) . 'px;'; //let them be bigger but only by 10%
-            //}
+            $style .= 'max-width:' . ($width * 1.1) . 'px;'; // let them be bigger but only by 10%
             if (!$isLastRow) {
                 $style .= 'margin-bottom:' . $spacing . ';';
             }
@@ -214,9 +188,10 @@ if ($type === 'columns') {
         $selector = '[data-grid="' . $maxWidth . '"]';
         $filesOnRow = [];
         $counter = 0;
-        foreach ($filesSizes as $index => $fileSize) {
+        foreach ($files as $index => $file) {
             $counter++;
-            list($fileWidth, $fileHeight) = $fileSize;
+            $fileWidth = $file['width'];
+            $fileHeight = $file['height'];
             $maxFileWidth = $fileWidth === null || $fileHeight === null ? 0 : $maxHeight / $fileHeight * $fileWidth;
             if ($totalRowImagesWidth + $maxFileWidth > $maxWidth) {
                 if (!empty($filesOnRow)) {
@@ -278,7 +253,7 @@ if ($hasLightbox) {
     echo '<link rel="client-packages-embed" name="lightbox">';
 }
 if ($hasResponsiveAttributes) {
-    echo '<link rel="client-packages-embed" name="-ivopetkov-image-gallery-responsive-attributes">';
+    echo '<link rel="client-packages-embed" name="responsiveAttributes">';
 }
 if (isset($containerStyle[0])) {
     echo '<style>' . $containerStyle . '</style>';
@@ -294,22 +269,17 @@ if ($hasLightbox) {
 if ($internalOptionRenderContainer) {
     echo '<div' . $containerAttributes . '>';
 }
-if (!$lazyLoadImages && ($imageAspectRatio !== null || $type === 'firstBig')) {
-    $filenames = [];
-    foreach ($files as $index => $file) {
-        $filenames[] = (string) $file->getAttribute('filename');
-    }
-    $filesSizes = $getImagesSizes($filenames);
-}
 foreach ($files as $index => $file) {
-    $class = (string) $file->getAttribute('class');
+    $filename = $file['filename'];
+    $fileElement = $file['element'];
+    $class = (string) $fileElement->getAttribute('class');
     $classAttribute = isset($class[0]) ? ' class="' . htmlentities($class) . '"' : '';
-    $alt = (string) $file->getAttribute('alt');
+    $alt = (string) $fileElement->getAttribute('alt');
     $altAttribute = isset($alt[0]) ? ' alt="' . htmlentities($alt) . '"' : '';
-    $title = (string) $file->getAttribute('title');
+    $title = (string) $fileElement->getAttribute('title');
     $titleAttribute = isset($title[0]) ? ' title="' . htmlentities($title) . '"' : '';
-    $quality = $file->getAttribute('quality');
-    $quality = strlen($quality) === 0 ? null : (int)$quality;
+    $quality = (string)$fileElement->getAttribute('quality');
+    $quality = isset($quality[0]) ? (int)$quality : null;
     if ($internalOptionRenderImageContainer) {
         echo '<div>';
     }
@@ -321,17 +291,16 @@ foreach ($files as $index => $file) {
             '});';
         echo '<a' . $titleAttribute . ' onclick="' . htmlentities($imageOnClick) . '" style="cursor:pointer;">';
     } elseif ($onClick === 'url') {
-        $url = (string) $file->getAttribute('url');
+        $url = (string) $fileElement->getAttribute('url');
         echo '<a' . $titleAttribute . ' href="' . (isset($url[0]) ? htmlentities($url) : '#') . '">';
     } elseif ($onClick === 'custom') {
-        $onClick = (string) $file->getAttribute('onClick');
+        $onClick = (string) $fileElement->getAttribute('onClick');
         echo '<a' . $titleAttribute . ' onclick="' . htmlentities(isset($onClick[0])) . '" style="cursor:pointer;">';
     }
     $currentImageAspectRatio = $imageAspectRatio;
     if ($type === 'firstBig' && $index > 0) {
         $currentImageAspectRatio = '1:1';
     }
-    $filename = (string) $file->getAttribute('filename');
     if ($lazyLoadImages) {
         $imageAttributes = '';
         if ($currentImageAspectRatio !== null) {
@@ -343,17 +312,20 @@ foreach ($files as $index => $file) {
         if ($quality !== null) {
             $imageAttributes .= ' quality="' . $quality . '"';
         }
+        $imageAttributes .= ' fileWidth="' . $file['width'] . '"';
+        $imageAttributes .= ' fileHeight="' . $file['height'] . '"';
         echo '<component src="lazy-image"' . $classAttribute . $altAttribute . $titleAttribute . ' filename="' . htmlentities($filename) . '" maxSize="' . $maxImageSize . '"' . $imageAttributes . '/>';
     } else {
         $assetOptions = [];
         $assetOptions['cacheMaxAge'] = 999999999;
         if ($currentImageAspectRatio !== null) {
-            $imageAspectRatioParts = explode(':', $currentImageAspectRatio);
-            list($imageWidth, $imageHeight) = $filesSizes[$index];
-            $newImageHeight = $imageWidth * $imageAspectRatioParts[1] / $imageAspectRatioParts[0];
+            $currentImageAspectRatioParts = explode(':', $currentImageAspectRatio);
+            $imageWidth = $file['width'];
+            $imageHeight = $file['height'];
+            $newImageHeight = $imageWidth * $currentImageAspectRatioParts[1] / $currentImageAspectRatioParts[0];
             if ($imageWidth !== null && $imageHeight !== null) {
                 if ($newImageHeight > $imageHeight) {
-                    $assetOptions['width'] = (int) ($imageHeight * $imageAspectRatioParts[0] / $imageAspectRatioParts[1]);
+                    $assetOptions['width'] = (int) ($imageHeight * $currentImageAspectRatioParts[0] / $currentImageAspectRatioParts[1]);
                     $assetOptions['height'] = $imageHeight;
                 } else {
                     $assetOptions['width'] = $imageWidth;
@@ -364,8 +336,8 @@ foreach ($files as $index => $file) {
         if ($quality !== null) {
             $assetOptions['quality'] = $quality;
         }
-        $imageUrl = $app->assets->getURL($filename, $assetOptions);
-        echo '<img' . $classAttribute . $altAttribute . $titleAttribute . ' style="max-width:100%;" src="' . $imageUrl . '"/>';
+        $imageURL = $app->assets->getURL($filename, $assetOptions);
+        echo '<img' . $classAttribute . $altAttribute . $titleAttribute . ' style="max-width:100%;" src="' . $imageURL . '"/>';
     }
 
     if ($onClick === 'fullscreen' || $onClick === 'url' || $onClick === 'custom') {
