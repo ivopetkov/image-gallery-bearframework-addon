@@ -379,7 +379,7 @@ if ($internalOptionRenderContainer) {
     echo '</div>';
 }
 if ($hasResponsiveAttributes) {
-    echo '<script>clientPackages.get(\'-ivopetkov-image-gallery-responsive-attributes\').then(function(responsiveAttributes){responsiveAttributes.run();})</script>';
+    echo '<script>clientPackages.get(\'responsiveAttributes\').then(function(r){r.run();})</script>';
 }
 echo '</body>';
 
