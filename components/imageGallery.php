@@ -61,17 +61,12 @@ if ($spacing === '') {
 
 $lazyLoadImages = $component->lazyLoadImages === 'true';
 
-$maxImageSize = (int)$component->maxImageSize;
-if ($maxImageSize === 0) {
-    $maxImageSize = null;
-}
-
 $galleryID = 'imggallery' . uniqid();
 $containerAttributes = '';
 
 if ($onClick === 'fullscreen') {
     $hasLightbox = true;
-    $serverData = ['imagegallery', [], $maxImageSize];
+    $serverData = ['imagegallery', []];
     foreach ($files as $file) {
         $serverData[1][] = [$file['filename'], $file['width'], $file['height']];
     }
@@ -312,9 +307,13 @@ foreach ($files as $index => $file) {
         if ($quality !== null) {
             $imageAttributes .= ' quality="' . $quality . '"';
         }
+        $imageAttributes .= ' minImageWidth="' . $fileElement->getAttribute('minimagewidth') . '"';
+        $imageAttributes .= ' minImageHeight="' . $fileElement->getAttribute('minimageheight') . '"';
+        $imageAttributes .= ' maxImageWidth="' . $fileElement->getAttribute('maximagewidth') . '"';
+        $imageAttributes .= ' maxImageHeight="' . $fileElement->getAttribute('maximageheight') . '"';
         $imageAttributes .= ' fileWidth="' . $file['width'] . '"';
         $imageAttributes .= ' fileHeight="' . $file['height'] . '"';
-        echo '<component src="lazy-image"' . $classAttribute . $altAttribute . $titleAttribute . ' filename="' . htmlentities($filename) . '" maxSize="' . $maxImageSize . '"' . $imageAttributes . '/>';
+        echo '<component src="lazy-image"' . $classAttribute . $altAttribute . $titleAttribute . ' filename="' . htmlentities($filename) . '"' . $imageAttributes . '/>';
     } else {
         $assetOptions = [];
         $assetOptions['cacheMaxAge'] = 999999999;

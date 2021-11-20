@@ -35,25 +35,13 @@ $app->serverRequests
             if (is_array($encryptedServerData) && isset($encryptedServerData[0], $encryptedServerData[1]) && $encryptedServerData[0] === 'imagegallery') {
                 $result = [];
                 $files = $encryptedServerData[1];
-                $maxImageSize = isset($encryptedServerData[2]) ? (int)$encryptedServerData[2] : null;
-                if ($maxImageSize === 0) {
-                    $maxImageSize = null;
-                }
+                $maxImageWidth = 4000;
+                $maxImageHeight = 4000;
                 foreach ($files as $file) {
                     $filename = $file[0];
                     $imageWidth = $file[1];
                     $imageHeight = $file[2];
-                    $html = $app->components->process('<component style="background-color:#000;" src="lazy-image" filename="' . htmlentities($filename) . '" fileWidth="' . $imageWidth . '" fileHeight="' . $imageHeight . '" maxSize="' . $maxImageSize . '"/>');
-                    if ($maxImageSize !== null) {
-                        if ($imageWidth > $maxImageSize) {
-                            $imageHeight = floor($maxImageSize / $imageWidth * $imageHeight);
-                            $imageWidth = $maxImageSize;
-                        }
-                        if ($imageHeight > $maxImageSize) {
-                            $imageWidth = floor($maxImageSize / $imageHeight * $imageWidth);
-                            $imageHeight = $maxImageSize;
-                        }
-                    }
+                    $html = $app->components->process('<component style="background-color:#000;" src="lazy-image" filename="' . htmlentities($filename) . '" fileWidth="' . $imageWidth . '" fileHeight="' . $imageHeight . '" maxImageWidth="' . $maxImageWidth . '" maxImageHeight="' . $maxImageHeight . '"/>');
                     $result[] = [$imageWidth, $imageHeight, $html];
                 }
 
