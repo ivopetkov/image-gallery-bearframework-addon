@@ -31,10 +31,12 @@ foreach ($fileElements as $index => $fileElement) {
         $fileWidth = $details['width'] !== null ? $details['width'] : null;
         $fileHeight = $details['height'] !== null ? $details['height'] : null;
     }
+    $fileWidth = (int)$fileWidth;
+    $fileHeight = (int)$fileHeight;
     $files[] = [
         'filename' => $filename,
-        'width' => (int)$fileWidth,
-        'height' => (int)$fileHeight,
+        'width' => $fileWidth > 0 ? $fileWidth : 1,
+        'height' => $fileHeight > 0 ? $fileHeight : 1,
         'element' => $fileElement
     ];
 }
