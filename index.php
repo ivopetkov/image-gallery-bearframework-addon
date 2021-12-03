@@ -55,7 +55,7 @@ $app->serverRequests
 
 $app->clientPackages
     ->add('-ivopetkov-image-gallery-lightbox', function (IvoPetkov\BearFrameworkAddons\ClientPackage $package) use ($context) {
-        //$package->addJSCode(file_get_contents($context->dir . '/assets/imageGalleryLightbox.js'));
+        //$package->addJSCode(file_get_contents($context->dir . '/dev/imageGalleryLightbox.js'));
         $package->addJSFile($context->assets->getURL('assets/imageGalleryLightbox.min.js', ['cacheMaxAge' => 999999999, 'version' => 6]));
         $package->get = 'return ivoPetkov.bearFrameworkAddons.imageGalleryLightbox;';
 
