@@ -41,7 +41,9 @@ $app->serverRequests
                     $filename = $file[0];
                     $imageWidth = $file[1];
                     $imageHeight = $file[2];
-                    $html = $app->components->process('<component style="background-color:#000;" src="lazy-image" filename="' . htmlentities($filename) . '" fileWidth="' . $imageWidth . '" fileHeight="' . $imageHeight . '" maxImageWidth="' . $maxImageWidth . '" maxImageHeight="' . $maxImageHeight . '"/>');
+                    $html = '<component style="background-color:#000;" src="lazy-image" filename="' . htmlentities($filename) . '" fileWidth="' . $imageWidth . '" fileHeight="' . $imageHeight . '" maxImageWidth="' . $maxImageWidth . '" maxImageHeight="' . $maxImageHeight . '"/>';
+                    $html = $app->components->process($html);
+                    $html = $app->clientPackages->process($html);
                     $result[] = [$imageWidth, $imageHeight, $html];
                 }
 
