@@ -193,7 +193,10 @@ if ($type === 'columns') {
         $totalRowImagesWidth = 0;
         $selector = '[data-grid="' . $maxWidth . '"]';
         $filesOnRow = [];
-        $showOnePerRow = ($imageSize === 'large' || $imageSize === 'huge') && $maxWidth < 500; // better for mobile
+        $showOnePerRow = false; // better for mobile
+        if (($imageSize === 'medium' || $imageSize === 'large' || $imageSize === 'huge') && $maxWidth <= 600) {
+            $showOnePerRow = true;
+        }
         $counter = 0;
         foreach ($files as $index => $file) {
             $counter++;
