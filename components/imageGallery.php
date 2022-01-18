@@ -158,49 +158,72 @@ if ($type === 'columns') {
     $hasElementID = true;
 
     $addFilesToRow = function ($attributeSelector, $filesOnRow, $isLastRow) use ($galleryID, &$containerStyle, $spacing) {
-        $totalWidth = array_sum($filesOnRow);
+        $totalWidth = 0;
+        foreach ($filesOnRow as $index => $fileData) {
+            $totalWidth += $fileData[0];
+        }
         $counter = 0;
         $filesOnRowCount = sizeof($filesOnRow);
-        foreach ($filesOnRow as $index => $width) {
+        foreach ($filesOnRow as $index => $fileData) {
+            list($width, $height, $maxWidth) = $fileData;
             $counter++;
-            $style = 'vertical-align:top;display:inline-block;width:calc((100% - ' . $spacing . '*' . ($filesOnRowCount - 1) . ')*' . (number_format($totalWidth === 0 ? 0 : $width / $totalWidth, 6, '.', '')) . ');';
+            $widthFormula = '(100% - ' . $spacing . '*' . ($filesOnRowCount - 1) . ')*' . (number_format($totalWidth === 0 ? 0 : $width / $totalWidth, 6, '.', ''));
+            $style = 'vertical-align:top;display:inline-block;width:calc(' . $widthFormula . ');';
             if ($counter < $filesOnRowCount) {
                 $style .= 'margin-right:' . $spacing . ';';
             }
-            $style .= 'max-width:' . ($width * 1.1) . 'px;'; // let them be bigger but only by 10%
+            if ($maxWidth !== null) {
+                $style .= 'max-width:' . $maxWidth . ';';
+            }
             if (!$isLastRow) {
                 $style .= 'margin-bottom:' . $spacing . ';';
             }
             $containerStyle .= '#' . $galleryID . $attributeSelector . '>div:nth-child(' . ($index + 1) . '){' . $style . '}';
         }
+        return $widthFormula . '/' . $width;
     };
 
     $minGridImageWidth = 200;
     $maxGridImageWidth = 2000;
     $gridImageWidthStep = 200;
 
+    $lastRenderedHeightFormula = null;
     $responsiveAttributes = [];
     for ($maxWidth = $minGridImageWidth; $maxWidth <= $maxGridImageWidth; $maxWidth += $gridImageWidthStep) {
         $totalRowImagesWidth = 0;
         $selector = '[data-grid="' . $maxWidth . '"]';
         $filesOnRow = [];
+        $showOnePerRow = ($imageSize === 'large' || $imageSize === 'huge') && $maxWidth < 500; // better for mobile
         $counter = 0;
         foreach ($files as $index => $file) {
             $counter++;
             $fileWidth = $file['width'];
             $fileHeight = $file['height'];
-            $maxFileWidth = $fileWidth === null || $fileHeight === null ? 0 : $maxHeight / $fileHeight * $fileWidth;
-            if ($totalRowImagesWidth + $maxFileWidth > $maxWidth) {
+            $maxFileWidth = floor($fileWidth === null || $fileHeight === null ? 0 : $maxHeight / $fileHeight * $fileWidth);
+            if ($showOnePerRow || $totalRowImagesWidth + $maxFileWidth > $maxWidth) {
                 if (!empty($filesOnRow)) {
-                    $addFilesToRow($selector, $filesOnRow, false);
+                    $lastRenderedHeightFormula = $addFilesToRow($selector, $filesOnRow, false);
                 }
                 $filesOnRow = [];
                 $totalRowImagesWidth = 0;
             }
-            $filesOnRow[$index] = $maxFileWidth;
+            $filesOnRow[$index] = [$maxFileWidth, $maxHeight, null];
             $totalRowImagesWidth += $maxFileWidth;
         }
         if (!empty($filesOnRow)) {
+            if (sizeof($filesOnRow) === 1 && !$showOnePerRow) { // make the last one the same height as the previous ones
+                if ($lastRenderedHeightFormula !== null) {
+                    foreach ($filesOnRow as $index => $fileData) {
+                        $fileData[2] = 'calc(' . $lastRenderedHeightFormula . '*' . $fileData[0] . ')';
+                        $filesOnRow[$index] = $fileData;
+                    }
+                } else {
+                    foreach ($filesOnRow as $index => $fileData) {
+                        $fileData[2] = $fileData[0] . 'px';
+                        $filesOnRow[$index] = $fileData;
+                    }
+                }
+            }
             $addFilesToRow($selector, $filesOnRow, true);
         }
         if ($maxWidth - $gridImageWidthStep <= $minGridImageWidth) {
