@@ -162,15 +162,38 @@ if ($type === 'columns') {
         foreach ($filesOnRow as $index => $fileData) {
             $totalWidth += $fileData[0];
         }
-        $counter = 0;
         $filesOnRowCount = sizeof($filesOnRow);
+        $allFilesWidthFormulas = [];
+        if ($filesOnRowCount > 1) { // Move the previous to last, last.
+            $lastIndex = null;
+            $previousToLastIndex = null;
+            $temp = [];
+            $counter = 0;
+            foreach ($filesOnRow as $index => $fileData) {
+                $counter++;
+                if ($counter === $filesOnRowCount - 1) {
+                    $previousToLast = [$index, $fileData];
+                    $previousToLastIndex = $index;
+                } else {
+                    $temp[$index] = $fileData;
+                }
+                $lastIndex = $index;
+            }
+            $temp[$previousToLast[0]] = $previousToLast[1];
+            $filesOnRow = $temp;
+        }
         foreach ($filesOnRow as $index => $fileData) {
-            list($width, $height, $maxWidth) = $fileData;
-            $counter++;
+            list($width, $maxWidth) = $fileData;
             $widthFormula = '(100% - ' . $spacing . '*' . ($filesOnRowCount - 1) . ')*' . (number_format($totalWidth === 0 ? 0 : $width / $totalWidth, 6, '.', ''));
+            $allFilesWidthFormulas[] = $widthFormula;
             $style = 'vertical-align:top;display:inline-block;width:calc(' . $widthFormula . ');';
-            if ($counter < $filesOnRowCount) {
-                $style .= 'margin-right:' . $spacing . ';';
+            if ($filesOnRowCount > 1) {
+                if ($lastIndex === $index) {
+                } elseif ($previousToLastIndex !== null && $previousToLastIndex === $index) { // last one with margin right
+                    $style .= 'margin-right:calc(100% - ' . $spacing . '*' . ($filesOnRowCount - 2) . ' - 0.999999px - ' . implode(' - ', $allFilesWidthFormulas) . ');';
+                } else {
+                    $style .= 'margin-right:' . $spacing . ';';
+                }
             }
             if ($maxWidth !== null) {
                 $style .= 'max-width:' . $maxWidth . ';';
@@ -210,19 +233,19 @@ if ($type === 'columns') {
                 $filesOnRow = [];
                 $totalRowImagesWidth = 0;
             }
-            $filesOnRow[$index] = [$maxFileWidth, $maxHeight, null];
+            $filesOnRow[$index] = [$maxFileWidth, null];
             $totalRowImagesWidth += $maxFileWidth;
         }
         if (!empty($filesOnRow)) {
             if (sizeof($filesOnRow) === 1 && !$showOnePerRow) { // make the last one the same height as the previous ones
                 if ($lastRenderedHeightFormula !== null) {
                     foreach ($filesOnRow as $index => $fileData) {
-                        $fileData[2] = 'calc(' . $lastRenderedHeightFormula . '*' . $fileData[0] . ')';
+                        $fileData[1] = 'calc(' . $lastRenderedHeightFormula . '*' . $fileData[0] . ')';
                         $filesOnRow[$index] = $fileData;
                     }
                 } else {
                     foreach ($filesOnRow as $index => $fileData) {
-                        $fileData[2] = $fileData[0] . 'px';
+                        $fileData[1] = $fileData[0] . 'px';
                         $filesOnRow[$index] = $fileData;
                     }
                 }
