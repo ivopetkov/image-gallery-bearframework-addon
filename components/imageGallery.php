@@ -206,8 +206,8 @@ if ($type === 'columns') {
         return $widthFormula . '/' . $width;
     };
 
-    $minGridImageWidth = 200;
-    $maxGridImageWidth = 2000;
+    $minGridImageWidth = 250; // There is a special case for 450
+    $maxGridImageWidth = 2050;
     $gridImageWidthStep = 200;
 
     $lastRenderedHeightFormula = null;
@@ -217,7 +217,7 @@ if ($type === 'columns') {
         $selector = '[data-grid="' . $maxWidth . '"]';
         $filesOnRow = [];
         $showOnePerRow = false; // better for mobile
-        if (($imageSize === 'medium' || $imageSize === 'large' || $imageSize === 'huge') && $maxWidth <= 600) {
+        if (($imageSize === 'medium' || $imageSize === 'large' || $imageSize === 'huge') && $maxWidth <= 450) { // 450 is big phone's width
             $showOnePerRow = true;
         }
         $counter = 0;
