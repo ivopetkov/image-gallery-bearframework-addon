@@ -237,7 +237,7 @@ if ($type === 'columns') {
             $totalRowImagesWidth += $maxFileWidth;
         }
         if (!empty($filesOnRow)) {
-            if (sizeof($filesOnRow) === 1 && !$showOnePerRow) { // make the last one the same height as the previous ones
+            if (!$showOnePerRow) { // make the last one the same height as the previous ones
                 if ($lastRenderedHeightFormula !== null) {
                     foreach ($filesOnRow as $index => $fileData) {
                         $fileData[1] = 'calc(' . $lastRenderedHeightFormula . '*' . $fileData[0] . ')';
