@@ -37,11 +37,18 @@ $app->serverRequests
                 $files = $encryptedServerData[1];
                 $maxImageWidth = 4000;
                 $maxImageHeight = 4000;
+
+                $imageAttributes = '';
+                $imageLoadingBackground = isset($encryptedServerData[2]) ? $encryptedServerData[2] : '';
+                if ($imageLoadingBackground !== '') {
+                    $imageAttributes .= ' loadingBackground="' . htmlentities($imageLoadingBackground) . '"';
+                }
+
                 foreach ($files as $file) {
                     $filename = $file[0];
                     $imageWidth = $file[1];
                     $imageHeight = $file[2];
-                    $html = '<component style="background-color:#000;" src="lazy-image" filename="' . htmlentities($filename) . '" fileWidth="' . $imageWidth . '" fileHeight="' . $imageHeight . '" maxImageWidth="' . $maxImageWidth . '" maxImageHeight="' . $maxImageHeight . '"/>';
+                    $html = '<component style="background-color:#000;" src="lazy-image" filename="' . htmlentities($filename) . '" fileWidth="' . $imageWidth . '" fileHeight="' . $imageHeight . '" maxImageWidth="' . $maxImageWidth . '" maxImageHeight="' . $maxImageHeight . '"' . $imageAttributes . '/>';
                     $html = $app->components->process($html);
                     $html = $app->clientPackages->process($html);
                     $result[] = [$imageWidth, $imageHeight, $html];

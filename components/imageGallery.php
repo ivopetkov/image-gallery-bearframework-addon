@@ -68,7 +68,11 @@ $containerAttributes = '';
 
 if ($onClick === 'fullscreen') {
     $hasLightbox = true;
-    $serverData = ['imagegallery', []];
+    $serverData = [
+        'imagegallery', // verification key
+        [], // files data
+        (string) $component->previewImageLoadingBackground
+    ];
     foreach ($files as $file) {
         $serverData[1][] = [$file['filename'], $file['width'], $file['height']];
     }
@@ -350,10 +354,10 @@ foreach ($files as $index => $file) {
     if ($lazyLoadImages) {
         $imageAttributes = '';
         if ($currentImageAspectRatio !== null) {
-            $imageAttributes .= ' aspectRatio="' . $currentImageAspectRatio . '"';
+            $imageAttributes .= ' aspectRatio="' . htmlentities($currentImageAspectRatio) . '"';
         }
         if ($imageLoadingBackground !== null) {
-            $imageAttributes .= ' loadingBackground="' . $imageLoadingBackground . '"';
+            $imageAttributes .= ' loadingBackground="' . htmlentities($imageLoadingBackground) . '"';
         }
         if ($quality !== null) {
             $imageAttributes .= ' quality="' . $quality . '"';
