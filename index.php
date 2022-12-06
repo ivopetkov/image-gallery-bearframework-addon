@@ -66,7 +66,7 @@ $app->serverRequests
 $app->clientPackages
     ->add('-ivopetkov-image-gallery-lightbox', function (IvoPetkov\BearFrameworkAddons\ClientPackage $package) use ($context) {
         //$package->addJSCode(file_get_contents($context->dir . '/dev/imageGalleryLightbox.js'));
-        $package->addJSFile($context->assets->getURL('assets/imageGalleryLightbox.min.js', ['cacheMaxAge' => 999999999, 'version' => 7]));
+        $package->addJSFile($context->assets->getURL('assets/imageGalleryLightbox.min.js', ['cacheMaxAge' => 999999999, 'version' => 8]));
         $package->get = 'return ivoPetkov.bearFrameworkAddons.imageGalleryLightbox;';
 
         $nextButtonIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M10 6l6 6-6 6"/></svg>';
@@ -78,16 +78,14 @@ $app->clientPackages
         $css = '[data-image-gallery-button="next"]{display:none;top:calc((100% - 42px)/2);right:5px;background-image:url(data:image/svg+xml;base64,' . base64_encode($nextButtonIcon) . ');background-size:30px;' . $buttonStyle . '}';
         $css .= '[data-image-gallery-button="previous"]{display:none;top:calc((100% - 42px)/2);left:5px;background-image:url(data:image/svg+xml;base64,' . base64_encode($previousButtonIcon) . ');background-size:30px;' . $buttonStyle . '}';
         $css .= '[data-image-gallery-button="close"]{right:5px;top:5px;background-image:url(data:image/svg+xml;base64,' . base64_encode($closeButtonIcon) . ');background-size:16px;' . $buttonStyle . '}';
-        $css .= '[data-image-gallery-button="zoomin"]{display:none;right:52px;top:5px;background-image:url(data:image/svg+xml;base64,' . base64_encode($zoomInButtonIcon) . ');background-size:18px;' . $buttonStyle . '}';
-        $css .= '[data-image-gallery-button="zoomout"]{display:none;right:52px;top:5px;background-image:url(data:image/svg+xml;base64,' . base64_encode($zoomOutButtonIcon) . ');background-size:18px;' . $buttonStyle . '}';
+        $css .= '[data-image-gallery-button="zoomin"]{display:none;right:52px;top:5px;background-image:url(data:image/svg+xml;base64,' . base64_encode($zoomInButtonIcon) . ');background-size:20px;' . $buttonStyle . 'background-position:10px 12px;}';
+        $css .= '[data-image-gallery-button="zoomout"]{display:none;right:52px;top:5px;background-image:url(data:image/svg+xml;base64,' . base64_encode($zoomOutButtonIcon) . ');background-size:20px;' . $buttonStyle . 'background-position:10px 12px;}';
         //$css .= '[data-image-gallery-button="download"]{display:none;right:5px;bottom:5px;background-image:url(data:image/svg+xml;base64,' . base64_encode($closeButtonIcon) . ');background-size:16px;' . $buttonStyle . '}';
 
         $package->addCSSCode($css);
     })
     ->add('-ivopetkov-image-gallery-lightbox-requirements', function (IvoPetkov\BearFrameworkAddons\ClientPackage $package) use ($context) {
-        $package->addJSFile($context->assets->getURL('assets/swiper.min.js', ['cacheMaxAge' => 999999999, 'version' => 1]));
-        $package->addCSSFile($context->assets->getURL('assets/swiper.min.css', ['cacheMaxAge' => 999999999, 'version' => 1]));
         $package->embedPackage('html5DOMDocument');
         //$package->addJSCode(file_get_contents($context->dir . '/dev/imageGalleryImageZoom.js'));
-        $package->addJSFile($context->assets->getURL('assets/imageGalleryImageZoom.min.js', ['cacheMaxAge' => 999999999, 'version' => 1]));
+        $package->addJSFile($context->assets->getURL('assets/imageGalleryImageZoom.min.js', ['cacheMaxAge' => 999999999, 'version' => 2]));
     });

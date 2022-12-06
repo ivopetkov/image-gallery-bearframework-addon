@@ -270,10 +270,93 @@ ivoPetkov.bearFrameworkAddons.imageGalleryImageZoom = ivoPetkov.bearFrameworkAdd
             return eventTarget;
         };
 
+        var getSwipeEventTarget = function (element, container) {
+            if (typeof container === 'undefined') {
+                container = element;
+            }
+            preventDefaultEvents(container);
+
+            var eventTarget = new EventTarget();
+
+            var pointers = []; // will be only one
+
+            var lastChange = [0, 0, null];
+
+            var pointerDownHandler = function (event) {
+                if (pointers.length === 1) {
+                    return;
+                }
+                for (var i in pointers) {
+                    if (pointers[i].downEvent.pointerId === event.pointerId) {
+                        return;
+                    }
+                }
+                pointers.push({
+                    downEvent: event,
+                    moveEvent: event
+                });
+                var event = new Event('start');
+                eventTarget.dispatchEvent(event);
+            };
+
+            var pointerMoveHandler = function (event) {
+                for (var i = 0; i < pointers.length; i++) {
+                    var pointer = pointers[i];
+                    var downEvent = pointer.downEvent;
+                    if (downEvent.pointerId === event.pointerId) {
+                        pointer.moveEvent = event;
+                    }
+                }
+                if (pointers.length === 0) {
+                    return;
+                }
+                var pointer1 = pointers[0];
+                var changeX = pointer1.moveEvent.clientX - pointer1.downEvent.clientX;
+                var changeY = pointer1.moveEvent.clientY - pointer1.downEvent.clientY;
+                var direction = null;
+                if (Math.abs(changeX) > Math.abs(changeY)) {
+                    direction = changeX < 0 ? 'left' : 'right';
+                } else {
+                    direction = changeY < 0 ? 'up' : 'down';
+                }
+                var event = new Event('change');
+                event.changeX = changeX;
+                event.changeY = changeY;
+                event.direction = direction;
+                eventTarget.dispatchEvent(event);
+                lastChange = [changeX, changeY, direction];
+            };
+
+            var pointerUpHandler = function (event) {
+                for (var i in pointers) {
+                    var pointer = pointers[i];
+                    if (pointer.downEvent.pointerId === event.pointerId) {
+                        pointers.splice(i, 1);
+                        var event = new Event('end');
+                        event.changeX = lastChange[0];
+                        event.changeY = lastChange[1];
+                        event.direction = lastChange[2];
+                        eventTarget.dispatchEvent(event);
+                        lastChange = [0, 0, null];
+                    }
+                }
+            };
+
+            element.addEventListener('pointerdown', pointerDownHandler);
+            container.addEventListener('pointermove', pointerMoveHandler);
+            container.addEventListener('pointerup', pointerUpHandler);
+            container.addEventListener('pointercancel', pointerUpHandler);
+            container.addEventListener('pointerout', pointerUpHandler);
+            container.addEventListener('pointerleave', pointerUpHandler);
+
+            return eventTarget;
+        };
+
         return {
             getZoomEventTarget: getZoomEventTarget,
             getMoveEventTarget: getMoveEventTarget,
-            getDoubleTapEventTarget: getDoubleTapEventTarget
+            getDoubleTapEventTarget: getDoubleTapEventTarget,
+            getSwipeEventTarget: getSwipeEventTarget
         }
     })();
 
@@ -419,7 +502,38 @@ ivoPetkov.bearFrameworkAddons.imageGalleryImageZoom = ivoPetkov.bearFrameworkAdd
         return api;
     };
 
+    var addSwipe = function (element, container) {
+        var swipeEventTarget = touchEvents.getSwipeEventTarget(element, container);
+
+        var api = new EventTarget();
+
+        swipeEventTarget.addEventListener('start', function (e) {
+            //console.log('start');
+            var event = new Event('start');
+            api.dispatchEvent(event);
+        });
+        swipeEventTarget.addEventListener('change', function (e) {
+            //console.log('change', e.direction, e.changeX, e.changeY);
+            var event = new Event('change');
+            event.direction = e.direction;
+            event.changeX = e.changeX;
+            event.changeY = e.changeY;
+            api.dispatchEvent(event);
+        });
+        swipeEventTarget.addEventListener('end', function (e) {
+            //console.log('end', e.direction, e.changeX, e.changeY);
+            var event = new Event('end');
+            event.direction = e.direction;
+            event.changeX = e.changeX;
+            event.changeY = e.changeY;
+            api.dispatchEvent(event);
+        });
+
+        return api;
+    };
+
     return {
-        addZoom: addZoom
+        addZoom: addZoom,
+        addSwipe: addSwipe
     }
 })();

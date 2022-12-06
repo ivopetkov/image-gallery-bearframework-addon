@@ -11,9 +11,11 @@ var ivoPetkov = ivoPetkov || {};
 ivoPetkov.bearFrameworkAddons = ivoPetkov.bearFrameworkAddons || {};
 ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddons.imageGalleryLightbox || (function () {
 
+    var padding = 5;
+
     var calculateImageWidth = function (width, height) {
-        var maxWidth = window.innerWidth - 5 * 2;
-        var maxHeight = window.innerHeight - 5 * 2;
+        var maxWidth = window.innerWidth - padding * 2;
+        var maxHeight = window.innerHeight - padding * 2;
         if (height > maxHeight) {
             width = maxHeight / height * width;
         }
@@ -25,11 +27,11 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
 
     var cachedDataResponses = {};
 
-    var swiperCounter = 0;
+    var lightboxesCounter = 0;
 
     var updateSizesAdded = false;
     var updateSizes = function () {
-        var containerID = 'imggalleryswp' + swiperCounter;
+        var containerID = 'imggalleryswp' + lightboxesCounter;
         var container = document.getElementById(containerID);
         if (container) {
             var slides = container.firstChild.childNodes;
@@ -40,7 +42,7 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
         }
     };
 
-    var open = function (lightbox, serverData, index) {
+    var open = function (lightbox, serverData, indexToShow) {
         if (!updateSizesAdded) {
             updateSizesAdded = true;
             window.addEventListener('resize', updateSizes);
@@ -56,13 +58,13 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
                 clientPackages.get('-ivopetkov-image-gallery-lightbox-requirements').then(function () {
                     var images = response.result;
                     var imagesCount = images.length;
-                    var containerID = 'imggalleryswp' + swiperCounter;
-                    var html = '<div id="' + containerID + '" class="swiper-container" style="width:100vw;height:100vh;">';
+                    var containerID = 'imggalleryswp' + lightboxesCounter;
+                    var html = '<div id="' + containerID + '" style="width:100vw;height:100vh;position:relative;">';
 
-                    html += '<div class="swiper-wrapper">';
+                    html += '<div style="position:absolute;top:0;left:0;width:100%;height:100%;">';
                     for (var i = 0; i < imagesCount; i++) {
                         var image = images[i];
-                        html += '<div class="swiper-slide" style="padding:5px;box-sizing:border-box;display:-ms-flexbox;display:-webkit-flex;display:flex;-ms-flex-align:center;-webkit-align-items:center;-webkit-box-align:center;align-items:center;-moz-justify-content:center;-webkit-justify-content:center;justify-content:center;overflow:hidden;">';
+                        html += '<div style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;padding:' + padding + 'px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;overflow:hidden;">';
                         html += '<div data-max-width="' + image[0] + '" data-max-height="' + image[1] + '" style="width:' + calculateImageWidth(image[0], image[1]) + 'px;font-size:0;line-height:0;"></div>';
                         html += '</div>';
                     }
@@ -88,10 +90,8 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
                             html5DOMDocument.insert(image[2], [slidesContainer.childNodes[i].firstChild]);
                         }
 
-                        var lastShownSlideIndex = null;
-                        var setLastShownSlideIndex = function (index) {
-                            lastShownSlideIndex = index;
-                        };
+                        var currentSlideIndex = indexToShow;
+                        var imagesSlideAPI = [];
                         var imagesZoomAPI = [];
 
                         var slidesElements = slidesContainer.childNodes;
@@ -139,40 +139,107 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
                             }
                         };
 
-                        for (var i = 0; i < slidesElements.length; i++) {
-                            var slideContainer = slidesElements[i];
-                            imagesZoomAPI[i] = ivoPetkov.bearFrameworkAddons.imageGalleryImageZoom.addZoom(slideContainer.firstChild, slideContainer);
-                            imagesZoomAPI[i].addEventListener('start', (function (index) {
-                                loadOriginalImage(index);
-                                setTimeout(function () {
-                                    checkHasZoom(index);
-                                }, 50);
-                            }).bind(null, i));
-                            imagesZoomAPI[i].addEventListener('end', (function (index) {
-                                checkHasZoom(index);
-                            }).bind(null, i));
-                            // var preventEvents = ((function (index) {
-                            //     return function (e) {
-                            //         if (imagesZoomAPI[index].hasZoom()) {
-                            //             console.log(index);
-                            //             e.stopPropagation();
-                            //         }
-                            //     }
-                            // }).bind(null, i))();
-                            // console.log(preventEvents);
-                            // console.log(slideContainer);
-                            // slideContainer.addEventListener("touchstart", preventEvents, { passive: false });
-                            // slideContainer.addEventListener("pointerdown", preventEvents, { passive: false });
-                            // slideContainer.addEventListener("mousedown", preventEvents, { passive: false });
-                        }
+                        var addSlideTransition = function (index) {
+                            var slideContainer = slidesElements[index];
+                            slideContainer.style.setProperty('transition', 'transform 0.3s ease-out');
+                        };
 
-                        var swiperObject = new Swiper('#' + containerID, {
-                            direction: 'horizontal',
-                            loop: false,
-                            keyboardControl: true,
-                            mousewheelControl: true
-                        });
-                        swiperObject.slideTo(index, 0);
+                        var addSlideTemporaryTransition = function (index) {
+                            addSlideTransition(index);
+                            setTimeout(function () {
+                                var slideContainer = slidesElements[index];
+                                slideContainer.style.removeProperty('transition');
+                            }, 300 + 16);
+                        };
+
+                        var setSlideVisibilityStatus = function (index, status, initMode) { // 0 - left, 1 - active, 2 - right
+                            var value = 'var(--swipe-x)';
+                            if (status === 0) {
+                                value = '-100vw';
+                            } else if (status === 2) {
+                                value = '100vw';
+                            }
+                            var slideContainer = slidesElements[index];
+                            if (initMode) {
+                                if (status !== 1) {
+                                    setTimeout(function () {
+                                        addSlideTransition(index);
+                                    }, 50);
+                                }
+                            } else {
+                                if (status === 1) {
+                                    addSlideTemporaryTransition(index);
+                                } else {
+                                    slideContainer.style.setProperty('--swipe-x', '0');
+                                    addSlideTransition(index);
+                                }
+                            }
+                            slideContainer.style.setProperty('transform', 'translate(' + value + ',0)');
+                        };
+
+                        var showSlide = function (index) {
+                            if (typeof images[index] === 'undefined') {
+                                return false;
+                            }
+                            setSlideVisibilityStatus(index, 1, false);
+                            for (var i = 0; i < index; i++) {
+                                setSlideVisibilityStatus(i, 0, false);
+                            }
+                            for (var i = index + 1; i < imagesCount; i++) {
+                                setSlideVisibilityStatus(i, 2, false);
+                            }
+                            currentSlideIndex = index;
+                            updateButtons();
+                            return true;
+                        };
+
+                        for (var i = 0; i < slidesElements.length; i++) {
+                            (function (index) {
+                                var slideContainer = slidesElements[index];
+
+                                setSlideVisibilityStatus(index, index === currentSlideIndex ? 1 : (index < currentSlideIndex ? 0 : 2), true);
+                                slideContainer.style.setProperty('display', 'flex');
+
+                                imagesZoomAPI[index] = ivoPetkov.bearFrameworkAddons.imageGalleryImageZoom.addZoom(slideContainer.firstChild, slideContainer);
+                                imagesSlideAPI[index] = ivoPetkov.bearFrameworkAddons.imageGalleryImageZoom.addSwipe(slideContainer);
+
+                                imagesSlideAPI[index].addEventListener('change', function (e) {
+                                    if (imagesZoomAPI[index].hasZoom()) {
+                                        return;
+                                    }
+                                    if (imagesCount < 2) {
+                                        return;
+                                    }
+                                    slideContainer.style.setProperty('--swipe-x', e.changeX + 'px');
+                                });
+                                imagesSlideAPI[index].addEventListener('end', function (e) {
+                                    if (imagesZoomAPI[index].hasZoom()) {
+                                        return;
+                                    }
+                                    if (imagesCount < 2) {
+                                        return;
+                                    }
+                                    var changeX = e.changeX;
+                                    if (Math.abs(changeX) > 100) { // swipe
+                                        if (showSlide(changeX > 0 ? currentSlideIndex - 1 : currentSlideIndex + 1)) {
+                                            return;
+                                        }
+                                    }
+                                    addSlideTemporaryTransition(index);
+                                    slideContainer.style.setProperty('--swipe-x', '0');
+                                });
+
+                                imagesZoomAPI[index].addEventListener('start', function () {
+                                    loadOriginalImage(index);
+                                    setTimeout(function () {
+                                        checkHasZoom(index);
+                                    }, 50);
+                                });
+                                imagesZoomAPI[index].addEventListener('end', function () {
+                                    checkHasZoom(index);
+                                });
+                            })(i);
+                        }
 
                         var nextButton = buttonsContainer.childNodes[0];
                         var previousButton = buttonsContainer.childNodes[1];
@@ -182,46 +249,47 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
                         //var downloadButton = buttonsContainer.childNodes[5];
 
                         updateButtons = function () {
-                            var index = lastShownSlideIndex;
                             if (imagesCount > 1) {
-                                nextButton.style.display = index + 1 < imagesCount ? 'flex' : 'none';
-                                previousButton.style.display = index === 0 ? 'none' : 'flex';
+                                nextButton.style.display = currentSlideIndex + 1 < imagesCount ? 'flex' : 'none';
+                                previousButton.style.display = currentSlideIndex === 0 ? 'none' : 'flex';
                             }
-                            var imageZoomAPI = imagesZoomAPI[index];
-                            var showZoomButtons = getAvailableZoomScale(index) > 1;
+                            var imageZoomAPI = imagesZoomAPI[currentSlideIndex];
+                            var showZoomButtons = getAvailableZoomScale(currentSlideIndex) > 1;
                             var imageHasZoom = imageZoomAPI.hasZoom();
                             zoomInButton.style.display = showZoomButtons && !imageHasZoom ? 'block' : 'none';
                             zoomOutButton.style.display = showZoomButtons && imageHasZoom ? 'block' : 'none';
-                            //var hasDownloadButton = getDownloadURL(index);
+                            //var hasDownloadButton = getDownloadURL(currentSlideIndex);
                             //downloadButton.style.display = hasDownloadButton ? 'block' : 'none';
                         };
 
-                        nextButton.addEventListener('click', swiperObject.slideNext);
-                        previousButton.addEventListener('click', swiperObject.slidePrev);
+                        var showNextPrevious = function (newIndex) {
+                            if (imagesZoomAPI[currentSlideIndex].hasZoom()) {
+                                imagesZoomAPI[currentSlideIndex].zoomOut();
+                            }
+                            showSlide(newIndex);
+                        };
+                        nextButton.addEventListener('click', function () {
+                            showNextPrevious(currentSlideIndex + 1);
+                        });
+                        previousButton.addEventListener('click', function () {
+                            showNextPrevious(currentSlideIndex - 1);
+                        });
                         closeButton.addEventListener('click', lightbox.close);
                         zoomInButton.addEventListener('click', function () {
-                            imagesZoomAPI[lastShownSlideIndex].zoomIn(getAvailableZoomScale(lastShownSlideIndex));
+                            imagesZoomAPI[currentSlideIndex].zoomIn(getAvailableZoomScale(currentSlideIndex));
                             updateButtons();
                         });
                         zoomOutButton.addEventListener('click', function () {
-                            imagesZoomAPI[lastShownSlideIndex].zoomOut();
+                            imagesZoomAPI[currentSlideIndex].zoomOut();
                             updateButtons();
                         });
                         // downloadButton.addEventListener('click', function () {
-                        //     var downloadURL = getDownloadURL(lastShownSlideIndex);
+                        //     var downloadURL = getDownloadURL(currentSlideIndex);
                         //     if (downloadURL !== null) {
                         //         window.open(downloadURL, '_self');
                         //     }
                         // });
 
-                        swiperObject.on('slideChangeStart', function (swiper) {
-                            if (lastShownSlideIndex !== null) {
-                                imagesZoomAPI[lastShownSlideIndex].zoomOut(); // zoom out the last one
-                            }
-                            setLastShownSlideIndex(swiper.activeIndex);
-                            updateButtons();
-                        });
-                        setLastShownSlideIndex(index);
                         updateButtons();
                     });
                 });
