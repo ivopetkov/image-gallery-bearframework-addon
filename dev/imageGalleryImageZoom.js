@@ -11,6 +11,48 @@ var ivoPetkov = ivoPetkov || {};
 ivoPetkov.bearFrameworkAddons = ivoPetkov.bearFrameworkAddons || {};
 ivoPetkov.bearFrameworkAddons.imageGalleryImageZoom = ivoPetkov.bearFrameworkAddons.imageGalleryImageZoom || (function () {
 
+    var makeEventTarget = () => {
+        if (EventTarget !== undefined && EventTarget.constructor !== undefined) {
+            try {
+                return new EventTarget();
+            } catch (e) {
+
+            }
+        }
+        // Needed for iOS
+        var listeners = [];
+        return {
+            addEventListener: (type, callback) => {
+                if (!(type in listeners)) {
+                    listeners[type] = [];
+                }
+                listeners[type].push(callback);
+            },
+            removeEventListener: (type, callback) => {
+                if (!(type in listeners)) {
+                    return;
+                }
+                var stack = listeners[type];
+                for (var i = 0, l = stack.length; i < l; i++) {
+                    if (stack[i] === callback) {
+                        stack.splice(i, 1);
+                        return;
+                    }
+                }
+            },
+            dispatchEvent: (event) => {
+                if (!(event.type in listeners)) {
+                    return true;
+                }
+                var stack = listeners[event.type].slice();
+                for (var i = 0, l = stack.length; i < l; i++) {
+                    stack[i].call(this, event);
+                }
+                return !event.defaultPrevented;
+            }
+        }
+    };
+
     var touchEvents = (function () {
 
         var getEventsPointsDistance = function (event1, event2) {
@@ -34,7 +76,7 @@ ivoPetkov.bearFrameworkAddons.imageGalleryImageZoom = ivoPetkov.bearFrameworkAdd
             }
             preventDefaultEvents(container);
 
-            var eventTarget = new EventTarget();
+            var eventTarget = makeEventTarget();
 
             var pointers = [];
 
@@ -118,7 +160,7 @@ ivoPetkov.bearFrameworkAddons.imageGalleryImageZoom = ivoPetkov.bearFrameworkAdd
             }
             preventDefaultEvents(container);
 
-            var eventTarget = new EventTarget();
+            var eventTarget = makeEventTarget();
 
             var pointers = [];
 
@@ -220,7 +262,7 @@ ivoPetkov.bearFrameworkAddons.imageGalleryImageZoom = ivoPetkov.bearFrameworkAdd
         var getDoubleTapEventTarget = function (element) {
             preventDefaultEvents(element);
 
-            var eventTarget = new EventTarget();
+            var eventTarget = makeEventTarget();
 
             var pointers = [];
             var lastEvents = [];
@@ -276,7 +318,7 @@ ivoPetkov.bearFrameworkAddons.imageGalleryImageZoom = ivoPetkov.bearFrameworkAdd
             }
             preventDefaultEvents(container);
 
-            var eventTarget = new EventTarget();
+            var eventTarget = makeEventTarget();
 
             var pointers = []; // will be only one
 
@@ -365,7 +407,7 @@ ivoPetkov.bearFrameworkAddons.imageGalleryImageZoom = ivoPetkov.bearFrameworkAdd
         var doubleTapEventTarget = touchEvents.getDoubleTapEventTarget(element);
         var moveEventTarget = touchEvents.getMoveEventTarget(element, container);
 
-        var api = new EventTarget();
+        var api = makeEventTarget();
 
         var dispatchStartEvent = function () {
             api.dispatchEvent(new Event('start'));
@@ -505,7 +547,7 @@ ivoPetkov.bearFrameworkAddons.imageGalleryImageZoom = ivoPetkov.bearFrameworkAdd
     var addSwipe = function (element, container) {
         var swipeEventTarget = touchEvents.getSwipeEventTarget(element, container);
 
-        var api = new EventTarget();
+        var api = makeEventTarget();
 
         swipeEventTarget.addEventListener('start', function (e) {
             //console.log('start');
