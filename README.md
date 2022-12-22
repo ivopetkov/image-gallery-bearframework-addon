@@ -44,15 +44,15 @@ $app->addons->add('ivopetkov/image-gallery-bearframework-addon');
 
 ### Attributes
 
-`onClick`
+`onclick`
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Defines the behaviour on image click. Available values: fullscreen, url, custom, none
 
-`imageAspectRatio`
+`image-aspect-ratio`
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The proportional relationship between the width and the height of every image. It is useful for cropping and resizing the images. Example values: 1:1, 1:2, 1.5:1, etc.
 
-`columnsCount`
+`columns-count`
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The number of columns that will be filled with the images
 
@@ -60,7 +60,7 @@ $app->addons->add('ivopetkov/image-gallery-bearframework-addon');
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The size of the images, if columnsCount is not specified. Available values: tiny, small, medium, large, huge
 
-`imageLoadingBackground`
+`image-loading-background`
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The type of background shown while the image is loading. Available values: none and checkered.
 
@@ -76,7 +76,7 @@ $app->addons->add('ivopetkov/image-gallery-bearframework-addon');
 
 3 columns of square images that will be opened in fullscreen when clicked
 ```html
-<component src="image-gallery" columnsCount="3" imageAspectRatio="1:1" onClick="fullscreen">
+<component src="image-gallery" columns-count="3" image-aspect-ratio="1:1" onclick="fullscreen">
     <file filename="/path/to/file1.jpg"/>
     <file filename="/path/to/file2.jpg"/>
     <file filename="/path/to/file3.jpg"/>
