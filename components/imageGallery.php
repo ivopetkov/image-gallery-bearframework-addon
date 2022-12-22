@@ -332,7 +332,8 @@ foreach ($files as $index => $file) {
     $titleAttribute = isset($title[0]) ? ' title="' . htmlentities($title) . '"' : '';
     if ($lazyLoad || $hasLightbox) {
         $assetOptionsAsAttributes = '';
-    } else {
+    }
+    if (!$lazyLoad) {
         $assetOptions = [];
     }
     foreach ($supportedAssetOptionsAttributes as $assetOptionName => $assetOptionAttributeData) {
