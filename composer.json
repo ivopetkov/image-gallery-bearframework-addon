@@ -19,7 +19,7 @@
         "php": "7.1.*|7.2.*|7.3.*|7.4.*|8.0.*|8.1.*",
         "bearframework/bearframework": "1.*",
         "ivopetkov/html-server-components-bearframework-addon": "1.*",
-        "ivopetkov/lazy-image-bearframework-addon": "1.*",
+        "ivopetkov/lazy-image-bearframework-addon": "2.*",
         "ivopetkov/js-lightbox-bearframework-addon": "1.*",
         "ivopetkov/html5-dom-document-php": "2.*",
         "ivopetkov/server-requests-bearframework-addon": "1.*",
