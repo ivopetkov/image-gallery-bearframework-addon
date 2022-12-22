@@ -41,27 +41,27 @@ foreach ($fileElements as $index => $fileElement) {
     ];
 }
 
-$type = (string) $component->type;
+$type = (string) $component->getAttribute('type');
 if (array_search($type, ['columns', 'grid', 'firstBig']) === false) {
     $type = 'columns';
 }
 
-$onClick = (string) $component->onClick;
+$onClick = (string) $component->getAttribute('onclick');
 if (array_search($onClick, ['fullscreen', 'url', 'custom', 'none']) === false) {
     $onClick = 'fullscreen';
 }
 
-$imageLoadingBackground = (string) $component->imageLoadingBackground;
+$imageLoadingBackground = (string) $component->getAttribute('image-loading-background');
 if ($imageLoadingBackground === '') {
     $imageLoadingBackground = null;
 }
 
-$spacing = (string) $component->spacing;
+$spacing = (string) $component->getAttribute('spacing');
 if ($spacing === '') {
     $spacing = '0px';
 }
 
-$lazyLoadImages = $component->lazyLoadImages === 'true';
+$lazyLoad = $component->getAttribute('lazy-load') === 'true';
 
 $galleryID = 'imggallery' . uniqid();
 $containerAttributes = '';
@@ -75,19 +75,19 @@ $imageAspectRatio = null;
 $containerStyle = '';
 if ($type === 'columns') {
 
-    $columnsCount = (string) $component->columnsCount;
+    $columnsCount = (string) $component->getAttribute('columns-count');
     if (is_numeric($columnsCount) && ((int)$columnsCount >= 1 && (int)$columnsCount <= 20)) {
         $columnsCount = (int)$columnsCount;
     } else {
         $columnsCount = 'auto';
     }
 
-    $imageSize = (string) $component->imageSize;
+    $imageSize = (string) $component->getAttribute('image-size');
     if (array_search($imageSize, ['tiny', 'small', 'medium', 'large', 'huge']) === false) {
         $imageSize = 'medium';
     }
 
-    $imageAspectRatio = (string) $component->imageAspectRatio;
+    $imageAspectRatio = (string) $component->getAttribute('image-aspect-ratio');
     if (preg_match('/^[0-9\.]+:[0-9\.]+$/', $imageAspectRatio) !== 1) {
         $imageAspectRatio = null;
     }
@@ -142,7 +142,7 @@ if ($type === 'columns') {
         'large' => 300,
         'huge' => 400
     ];
-    $imageSize = (string) $component->imageSize;
+    $imageSize = (string) $component->getAttribute('image-size');
     if (!isset($maxHeights[$imageSize])) {
         $imageSize = 'medium';
     }
@@ -282,7 +282,7 @@ if ($hasElementID) {
     $containerAttributes .= ' id="' . htmlentities($galleryID) . '"';
 }
 
-$class = (string) $component->class;
+$class = (string) $component->getAttribute('class');
 if (isset($class[0])) {
     $containerAttributes .= ' class="' . htmlentities($class) . '"';
 }
@@ -317,7 +317,7 @@ if ($hasLightbox) {
     $lightboxServerData = [
         'imagegallery', // verification key
         [], // files data
-        (string) $component->previewImageLoadingBackground
+        (string) $component->getAttribute('preview-image-loading-background')
     ];
 }
 
@@ -330,7 +330,7 @@ foreach ($files as $index => $file) {
     $altAttribute = isset($alt[0]) ? ' alt="' . htmlentities($alt) . '"' : '';
     $title = (string) $fileElement->getAttribute('title');
     $titleAttribute = isset($title[0]) ? ' title="' . htmlentities($title) . '"' : '';
-    if ($lazyLoadImages || $hasLightbox) {
+    if ($lazyLoad || $hasLightbox) {
         $assetOptionsAsAttributes = '';
     } else {
         $assetOptions = [];
@@ -339,7 +339,7 @@ foreach ($files as $index => $file) {
         $assetOptionAttributeName = $assetOptionAttributeData[0];
         $assetOptionAttributeValue = (string)$fileElement->getAttribute($assetOptionAttributeName);
         if ($assetOptionAttributeValue !== '') {
-            if ($lazyLoadImages) {
+            if ($lazyLoad) {
                 $assetOptionsAsAttributes .= ' ' . $assetOptionAttributeName . '="' . htmlentities($assetOptionAttributeValue) . '"';
             } else {
                 if ($assetOptionAttributeData[1] === 'int') {
@@ -369,7 +369,7 @@ foreach ($files as $index => $file) {
     if ($type === 'firstBig' && $index > 0) {
         $currentImageAspectRatio = '1:1';
     }
-    if ($lazyLoadImages) {
+    if ($lazyLoad) {
         $imageAttributes = '';
         if ($currentImageAspectRatio !== null) {
             $imageAttributes .= ' aspect-ratio="' . htmlentities($currentImageAspectRatio) . '"';
