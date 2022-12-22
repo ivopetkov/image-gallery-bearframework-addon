@@ -68,16 +68,6 @@ $containerAttributes = '';
 
 if ($onClick === 'fullscreen') {
     $hasLightbox = true;
-    $serverData = [
-        'imagegallery', // verification key
-        [], // files data
-        (string) $component->previewImageLoadingBackground
-    ];
-    foreach ($files as $file) {
-        $serverData[1][] = [$file['filename'], $file['width'], $file['height']];
-    }
-    $serverData = json_encode($serverData);
-    $jsData = md5($serverData) . base64_encode($app->encryption->encrypt(gzcompress($serverData)));
 }
 
 $imageAspectRatio = null;
@@ -296,6 +286,14 @@ $class = (string) $component->class;
 if (isset($class[0])) {
     $containerAttributes .= ' class="' . htmlentities($class) . '"';
 }
+
+$supportedAssetOptionsAttributes = [
+    'cacheMaxAge' => ['asset-cache-max-age', 'int'],
+    'quality' => ['asset-quality', 'int'],
+    'svgFill' => ['asset-svg-fill', 'string'],
+    'svgStroke' => ['asset-svg-stroke', 'string']
+];
+
 echo '<html>';
 
 echo '<head>';
@@ -311,14 +309,18 @@ if (isset($containerStyle[0])) {
 echo '</head>';
 
 echo '<body>';
-if ($hasLightbox) {
-    echo '<script>';
-    echo 'window.' . $galleryID . '=' . json_encode($jsData) . ';';
-    echo '</script>';
-}
 if ($internalOptionRenderContainer) {
     echo '<div' . $containerAttributes . '>';
 }
+
+if ($hasLightbox) {
+    $lightboxServerData = [
+        'imagegallery', // verification key
+        [], // files data
+        (string) $component->previewImageLoadingBackground
+    ];
+}
+
 foreach ($files as $index => $file) {
     $filename = $file['filename'];
     $fileElement = $file['element'];
@@ -328,17 +330,33 @@ foreach ($files as $index => $file) {
     $altAttribute = isset($alt[0]) ? ' alt="' . htmlentities($alt) . '"' : '';
     $title = (string) $fileElement->getAttribute('title');
     $titleAttribute = isset($title[0]) ? ' title="' . htmlentities($title) . '"' : '';
-    $quality = (string)$fileElement->getAttribute('quality');
-    $quality = isset($quality[0]) ? (int)$quality : null;
+    if ($lazyLoadImages || $hasLightbox) {
+        $assetOptionsAsAttributes = '';
+    } else {
+        $assetOptions = [];
+    }
+    foreach ($supportedAssetOptionsAttributes as $assetOptionName => $assetOptionAttributeData) {
+        $assetOptionAttributeName = $assetOptionAttributeData[0];
+        $assetOptionAttributeValue = (string)$fileElement->getAttribute($assetOptionAttributeName);
+        if ($assetOptionAttributeValue !== '') {
+            if ($lazyLoadImages) {
+                $assetOptionsAsAttributes .= ' ' . $assetOptionAttributeName . '="' . htmlentities($assetOptionAttributeValue) . '"';
+            } else {
+                if ($assetOptionAttributeData[1] === 'int') {
+                    $assetOptionAttributeValue = (int)$assetOptionAttributeValue;
+                }
+                $assetOptions[$assetOptionName] = $assetOptionAttributeValue;
+            }
+        }
+    }
+    if ($hasLightbox) {
+        $lightboxServerData[1][] = [$filename, $file['width'], $file['height'], $assetOptionsAsAttributes];
+    }
     if ($internalOptionRenderImageContainer) {
         echo '<div>';
     }
     if ($onClick === 'fullscreen') {
-        $imageOnClick = 'clientPackages.get(\'lightbox\').then(function(lightbox){var context=lightbox.make({showCloseButton:false});' .
-            'clientPackages.get(\'-ivopetkov-image-gallery-lightbox\').then(function(imageGalleryLightbox){' .
-            'imageGalleryLightbox.open(context,window.' . $galleryID . ',' . $index . ');' .
-            '})' .
-            '});';
+        $imageOnClick = 'window.' . $galleryID . 'c(' . $index . ');';
         echo '<a' . $titleAttribute . ' onclick="' . htmlentities($imageOnClick) . '" style="cursor:pointer;">';
     } elseif ($onClick === 'url') {
         $url = (string) $fileElement->getAttribute('url');
@@ -359,19 +377,14 @@ foreach ($files as $index => $file) {
         if ($imageLoadingBackground !== null) {
             $imageAttributes .= ' loadingBackground="' . htmlentities($imageLoadingBackground) . '"';
         }
-        if ($quality !== null) {
-            $imageAttributes .= ' quality="' . $quality . '"';
-        }
         $imageAttributes .= ' minImageWidth="' . $fileElement->getAttribute('minimagewidth') . '"';
         $imageAttributes .= ' minImageHeight="' . $fileElement->getAttribute('minimageheight') . '"';
         $imageAttributes .= ' maxImageWidth="' . $fileElement->getAttribute('maximagewidth') . '"';
         $imageAttributes .= ' maxImageHeight="' . $fileElement->getAttribute('maximageheight') . '"';
         $imageAttributes .= ' fileWidth="' . $file['width'] . '"';
         $imageAttributes .= ' fileHeight="' . $file['height'] . '"';
-        echo '<component src="lazy-image"' . $classAttribute . $altAttribute . $titleAttribute . ' filename="' . htmlentities($filename) . '"' . $imageAttributes . '/>';
+        echo '<component src="lazy-image"' . $classAttribute . $altAttribute . $titleAttribute . ' filename="' . htmlentities($filename) . '"' . $imageAttributes . $assetOptionsAsAttributes . '/>';
     } else {
-        $assetOptions = [];
-        $assetOptions['cacheMaxAge'] = 999999999;
         if ($currentImageAspectRatio !== null) {
             $currentImageAspectRatioParts = explode(':', $currentImageAspectRatio);
             $imageWidth = $file['width'];
@@ -386,9 +399,6 @@ foreach ($files as $index => $file) {
                     $assetOptions['height'] = $newImageHeight;
                 }
             }
-        }
-        if ($quality !== null) {
-            $assetOptions['quality'] = $quality;
         }
         $imageURL = $app->assets->getURL($filename, $assetOptions);
         echo '<img' . $classAttribute . $altAttribute . $titleAttribute . ' style="max-width:100%;" src="' . $imageURL . '"/>';
@@ -406,6 +416,13 @@ if ($internalOptionRenderContainer) {
 }
 if ($hasResponsiveAttributes) {
     echo '<script>clientPackages.get(\'responsiveAttributes\').then(function(r){r.run();})</script>';
+}
+if ($hasLightbox) {
+    echo '<script>';
+    $lightboxServerData = json_encode($lightboxServerData);
+    $lightboxJsData = md5($lightboxServerData) . base64_encode($app->encryption->encrypt(gzcompress($lightboxServerData)));
+    echo 'window.' . $galleryID . 'c=function(i){clientPackages.get(\'lightbox\').then(function(lightbox){var c=lightbox.make({showCloseButton:false});clientPackages.get(\'-ivopetkov-image-gallery-lightbox\').then(function(l){l.open(c,' . json_encode($lightboxJsData) . ',i);})});};';
+    echo '</script>';
 }
 echo '</body>';
 

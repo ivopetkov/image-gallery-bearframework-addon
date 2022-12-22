@@ -37,10 +37,10 @@ $app->serverRequests
                 $files = $encryptedServerData[1];
                 $maxImageSize = 4000;
 
-                $imageAttributes = '';
+                $sharedImageAttributes = '';
                 $imageLoadingBackground = isset($encryptedServerData[2]) ? $encryptedServerData[2] : '';
                 if ($imageLoadingBackground !== '') {
-                    $imageAttributes .= ' loadingBackground="' . htmlentities($imageLoadingBackground) . '"';
+                    $sharedImageAttributes .= ' loadingBackground="' . htmlentities($imageLoadingBackground) . '"';
                 }
 
                 foreach ($files as $file) {
@@ -48,6 +48,10 @@ $app->serverRequests
                     $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
                     $imageWidth = $file[1];
                     $imageHeight = $file[2];
+                    $imageAttributes = $sharedImageAttributes;
+                    if (isset($file[3])) {
+                        $imageAttributes .= $file[3];
+                    }
                     $html = '<component src="lazy-image" filename="' . htmlentities($filename) . '" fileWidth="' . $imageWidth . '" fileHeight="' . $imageHeight . '" maxImageWidth="' . $maxImageSize . '" maxImageHeight="' . $maxImageSize . '"' . $imageAttributes . '/>'; // Removed style="background-color:#000;" for SVGs
                     $html = $app->components->process($html);
                     $html = $app->clientPackages->process($html);
