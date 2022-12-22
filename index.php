@@ -35,8 +35,7 @@ $app->serverRequests
             if (is_array($encryptedServerData) && isset($encryptedServerData[0], $encryptedServerData[1]) && $encryptedServerData[0] === 'imagegallery') {
                 $result = [];
                 $files = $encryptedServerData[1];
-                $maxImageWidth = 4000;
-                $maxImageHeight = 4000;
+                $maxImageSize = 4000;
 
                 $imageAttributes = '';
                 $imageLoadingBackground = isset($encryptedServerData[2]) ? $encryptedServerData[2] : '';
@@ -46,13 +45,25 @@ $app->serverRequests
 
                 foreach ($files as $file) {
                     $filename = $file[0];
+                    $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
                     $imageWidth = $file[1];
                     $imageHeight = $file[2];
-                    $html = '<component style="background-color:#000;" src="lazy-image" filename="' . htmlentities($filename) . '" fileWidth="' . $imageWidth . '" fileHeight="' . $imageHeight . '" maxImageWidth="' . $maxImageWidth . '" maxImageHeight="' . $maxImageHeight . '"' . $imageAttributes . '/>';
+                    $html = '<component src="lazy-image" filename="' . htmlentities($filename) . '" fileWidth="' . $imageWidth . '" fileHeight="' . $imageHeight . '" maxImageWidth="' . $maxImageSize . '" maxImageHeight="' . $maxImageSize . '"' . $imageAttributes . '/>'; // Removed style="background-color:#000;" for SVGs
                     $html = $app->components->process($html);
                     $html = $app->clientPackages->process($html);
                     //$downloadURL = $app->assets->getURL($filename, ['download' => true]);
-                    $result[] = [$imageWidth, $imageHeight, $html];
+                    if ($extension === 'svg') {
+                        if ($imageWidth > $imageHeight) {
+                            $maxWidth = $maxImageSize;
+                            $maxHeight = floor($imageHeight / $imageWidth * $maxImageSize);
+                        } else {
+                            $maxHeight = $maxImageSize;
+                            $maxWidth = floor($imageWidth / $imageHeight * $maxImageSize);
+                        }
+                        $result[] = [$maxWidth, $maxHeight, $html];
+                    } else {
+                        $result[] = [$imageWidth, $imageHeight, $html];
+                    }
                 }
 
                 return json_encode([
