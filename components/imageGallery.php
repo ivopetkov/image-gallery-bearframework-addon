@@ -24,8 +24,8 @@ $domDocument->loadHTML($component->innerHTML, HTML5DOMDocument::ALLOW_DUPLICATE_
 $fileElements = $domDocument->querySelectorAll('file');
 foreach ($fileElements as $index => $fileElement) {
     $filename = (string) $fileElement->getAttribute('filename');
-    $fileWidth = (string) $fileElement->getAttribute('filewidth');
-    $fileHeight = (string) $fileElement->getAttribute('fileheight');
+    $fileWidth = (string) $fileElement->getAttribute('file-width');
+    $fileHeight = (string) $fileElement->getAttribute('file-height');
     if ($fileWidth === '' || $fileHeight === '') {
         $details = $app->assets->getDetails($filename, ['width', 'height']);
         $fileWidth = $details['width'] !== null ? $details['width'] : null;
@@ -372,17 +372,17 @@ foreach ($files as $index => $file) {
     if ($lazyLoadImages) {
         $imageAttributes = '';
         if ($currentImageAspectRatio !== null) {
-            $imageAttributes .= ' aspectRatio="' . htmlentities($currentImageAspectRatio) . '"';
+            $imageAttributes .= ' aspect-ratio="' . htmlentities($currentImageAspectRatio) . '"';
         }
         if ($imageLoadingBackground !== null) {
-            $imageAttributes .= ' loadingBackground="' . htmlentities($imageLoadingBackground) . '"';
+            $imageAttributes .= ' loading-background="' . htmlentities($imageLoadingBackground) . '"';
         }
-        $imageAttributes .= ' minImageWidth="' . $fileElement->getAttribute('minimagewidth') . '"';
-        $imageAttributes .= ' minImageHeight="' . $fileElement->getAttribute('minimageheight') . '"';
-        $imageAttributes .= ' maxImageWidth="' . $fileElement->getAttribute('maximagewidth') . '"';
-        $imageAttributes .= ' maxImageHeight="' . $fileElement->getAttribute('maximageheight') . '"';
-        $imageAttributes .= ' fileWidth="' . $file['width'] . '"';
-        $imageAttributes .= ' fileHeight="' . $file['height'] . '"';
+        $imageAttributes .= ' min-asset-width="' . $fileElement->getAttribute('min-asset-width') . '"';
+        $imageAttributes .= ' min-asset-height="' . $fileElement->getAttribute('min-asset-height') . '"';
+        $imageAttributes .= ' max-asset-width="' . $fileElement->getAttribute('max-asset-width') . '"';
+        $imageAttributes .= ' max-asset-height="' . $fileElement->getAttribute('max-asset-height') . '"';
+        $imageAttributes .= ' file-width="' . $file['width'] . '"';
+        $imageAttributes .= ' file-height="' . $file['height'] . '"';
         echo '<component src="lazy-image"' . $classAttribute . $altAttribute . $titleAttribute . ' filename="' . htmlentities($filename) . '"' . $imageAttributes . $assetOptionsAsAttributes . '/>';
     } else {
         if ($currentImageAspectRatio !== null) {

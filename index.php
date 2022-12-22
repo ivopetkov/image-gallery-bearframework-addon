@@ -40,7 +40,7 @@ $app->serverRequests
                 $sharedImageAttributes = '';
                 $imageLoadingBackground = isset($encryptedServerData[2]) ? $encryptedServerData[2] : '';
                 if ($imageLoadingBackground !== '') {
-                    $sharedImageAttributes .= ' loadingBackground="' . htmlentities($imageLoadingBackground) . '"';
+                    $sharedImageAttributes .= ' loading-background="' . htmlentities($imageLoadingBackground) . '"';
                 }
 
                 foreach ($files as $file) {
@@ -52,7 +52,7 @@ $app->serverRequests
                     if (isset($file[3])) {
                         $imageAttributes .= $file[3];
                     }
-                    $html = '<component src="lazy-image" filename="' . htmlentities($filename) . '" fileWidth="' . $imageWidth . '" fileHeight="' . $imageHeight . '" maxImageWidth="' . $maxImageSize . '" maxImageHeight="' . $maxImageSize . '"' . $imageAttributes . '/>'; // Removed style="background-color:#000;" for SVGs
+                    $html = '<component src="lazy-image" filename="' . htmlentities($filename) . '" file-width="' . $imageWidth . '" file-height="' . $imageHeight . '" max-asset-width="' . $maxImageSize . '" max-asset-height="' . $maxImageSize . '"' . $imageAttributes . '/>'; // Removed style="background-color:#000;" for SVGs
                     $html = $app->components->process($html);
                     $html = $app->clientPackages->process($html);
                     //$downloadURL = $app->assets->getURL($filename, ['download' => true]);
