@@ -52,7 +52,7 @@ $app->serverRequests
                     if (isset($file[3])) {
                         $imageAttributes .= $file[3];
                     }
-                    $html = '<component src="lazy-image" filename="' . htmlentities($filename) . '" file-width="' . $imageWidth . '" file-height="' . $imageHeight . '" max-asset-width="' . $maxImageSize . '" max-asset-height="' . $maxImageSize . '"' . $imageAttributes . '/>'; // Removed style="background-color:#000;" for SVGs
+                    $html = '<component src="lazy-image" style="background-color:#000;" filename="' . htmlentities($filename) . '" file-width="' . $imageWidth . '" file-height="' . $imageHeight . '" max-asset-width="' . $maxImageSize . '" max-asset-height="' . $maxImageSize . '"' . $imageAttributes . '/>';
                     $html = $app->components->process($html);
                     $html = $app->clientPackages->process($html);
                     //$downloadURL = $app->assets->getURL($filename, ['download' => true]);
