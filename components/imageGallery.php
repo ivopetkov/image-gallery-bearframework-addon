@@ -47,7 +47,7 @@ if (array_search($type, ['columns', 'grid', 'firstBig']) === false) {
 }
 
 $onClick = (string) $component->getAttribute('onclick');
-if (array_search($onClick, ['fullscreen', 'url', 'custom', 'none']) === false) {
+if (array_search($onClick, ['fullscreen', 'url', 'script', 'none']) === false) {
     $onClick = 'fullscreen';
 }
 
@@ -362,9 +362,9 @@ foreach ($files as $index => $file) {
     } elseif ($onClick === 'url') {
         $url = (string) $fileElement->getAttribute('url');
         echo '<a' . $titleAttribute . ' href="' . (isset($url[0]) ? htmlentities($url) : '#') . '">';
-    } elseif ($onClick === 'custom') {
-        $onClick = (string) $fileElement->getAttribute('onClick');
-        echo '<a' . $titleAttribute . ' onclick="' . htmlentities(isset($onClick[0])) . '" style="cursor:pointer;">';
+    } elseif ($onClick === 'script') {
+        $onClickScript = (string) $fileElement->getAttribute('script');
+        echo '<a' . $titleAttribute . ' onclick="' . htmlentities($onClickScript) . '" style="cursor:pointer;">';
     }
     $currentImageAspectRatio = $imageAspectRatio;
     if ($type === 'firstBig' && $index > 0) {
@@ -405,7 +405,7 @@ foreach ($files as $index => $file) {
         echo '<img' . $classAttribute . $altAttribute . $titleAttribute . ' style="max-width:100%;" src="' . $imageURL . '"/>';
     }
 
-    if ($onClick === 'fullscreen' || $onClick === 'url' || $onClick === 'custom') {
+    if ($onClick === 'fullscreen' || $onClick === 'url' || $onClick === 'script') {
         echo '</a>';
     }
     if ($internalOptionRenderImageContainer) {
