@@ -78,6 +78,8 @@ if ($type === 'columns') {
     $columnsCount = (string) $component->getAttribute('columns-count');
     if (is_numeric($columnsCount) && ((int)$columnsCount >= 1 && (int)$columnsCount <= 20)) {
         $columnsCount = (int)$columnsCount;
+    } else if ($columnsCount === 'match') {
+        $columnsCount = sizeof($files);
     } else {
         $columnsCount = 'auto';
     }
