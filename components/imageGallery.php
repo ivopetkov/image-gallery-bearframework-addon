@@ -96,7 +96,7 @@ if ($type === 'columns') {
 
     $getColumnsStyle = function ($columnsCount, $attributeSelector = '') use ($galleryID, $spacing) {
         $result = '#' . $galleryID . $attributeSelector . '>div{vertical-align:top;display:inline-block;width:calc((100% - ' . $spacing . '*' . ($columnsCount - 1) . ')/' . $columnsCount . ');margin-right:' . $spacing . ';margin-top:' . $spacing . ';}';
-        $result .= '#' . $galleryID . $attributeSelector . '>div:nth-child(' . $columnsCount . 'n){margin-right:0;}';
+        $result .= '#' . $galleryID . $attributeSelector . '>div:nth-child(' . $columnsCount . 'n){margin-right:0;width:calc((100% - ' . $spacing . '*' . ($columnsCount - 1) . ')/' . $columnsCount . ' - 0.99px);}'; // 0.99px is fix so there is no overflow
         for ($i = 1; $i <= $columnsCount; $i++) {
             $result .= '#' . $galleryID . $attributeSelector . '>div:nth-child(' . $i . '){margin-top:0;}';
         }
