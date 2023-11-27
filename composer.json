@@ -21,6 +21,7 @@
         "ivopetkov/html-server-components-bearframework-addon": "1.*",
         "ivopetkov/lazy-image-bearframework-addon": "2.*",
         "ivopetkov/js-lightbox-bearframework-addon": "1.*",
+        "ivopetkov/touch-events-js-bearframework-addon": "1.*",
         "ivopetkov/html5-dom-document-php": "2.*",
         "ivopetkov/server-requests-bearframework-addon": "1.*",
         "ivopetkov/encryption-bearframework-addon": "1.*",

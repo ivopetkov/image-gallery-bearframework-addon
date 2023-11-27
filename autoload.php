@@ -12,6 +12,7 @@ BearFramework\Addons::register('ivopetkov/image-gallery-bearframework-addon', __
         'ivopetkov/html-server-components-bearframework-addon',
         'ivopetkov/lazy-image-bearframework-addon',
         'ivopetkov/js-lightbox-bearframework-addon',
+        'ivopetkov/touch-events-js-bearframework-addon',
         'ivopetkov/server-requests-bearframework-addon',
         'ivopetkov/encryption-bearframework-addon',
         'ivopetkov/client-packages-bearframework-addon',

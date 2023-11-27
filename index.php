@@ -81,7 +81,7 @@ $app->serverRequests
 $app->clientPackages
     ->add('-ivopetkov-image-gallery-lightbox', function (IvoPetkov\BearFrameworkAddons\ClientPackage $package) use ($context) {
         //$package->addJSCode(file_get_contents($context->dir . '/dev/imageGalleryLightbox.js'));
-        $package->addJSFile($context->assets->getURL('assets/imageGalleryLightbox.min.js', ['cacheMaxAge' => 999999999, 'version' => 10]));
+        $package->addJSFile($context->assets->getURL('assets/imageGalleryLightbox.min.js', ['cacheMaxAge' => 999999999, 'version' => 13]));
         $package->get = 'return ivoPetkov.bearFrameworkAddons.imageGalleryLightbox;';
 
         $nextButtonIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M10 6l6 6-6 6"/></svg>';
@@ -101,6 +101,8 @@ $app->clientPackages
     })
     ->add('-ivopetkov-image-gallery-lightbox-requirements', function (IvoPetkov\BearFrameworkAddons\ClientPackage $package) use ($context) {
         $package->embedPackage('html5DOMDocument');
+        $package->embedPackage('touchEvents');
         //$package->addJSCode(file_get_contents($context->dir . '/dev/imageGalleryImageZoom.js'));
-        $package->addJSFile($context->assets->getURL('assets/imageGalleryImageZoom.min.js', ['cacheMaxAge' => 999999999, 'version' => 4]));
+        $package->get = 'return ivoPetkov.bearFrameworkAddons.imageGalleryImageZoom;';
+        $package->addJSFile($context->assets->getURL('assets/imageGalleryImageZoom.min.js', ['cacheMaxAge' => 999999999, 'version' => 6]));
     });

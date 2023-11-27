@@ -39,11 +39,14 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
                 var response = {};
             }
             if (typeof response.status !== 'undefined' && response.status === '1') {
-                clientPackages.get('-ivopetkov-image-gallery-lightbox-requirements').then(function () {
+                clientPackages.get('-ivopetkov-image-gallery-lightbox-requirements').then(function (imageGalleryImageZoom) {
+                    if (!lightbox.isActive()) {
+                        return;
+                    }
                     var images = response.result;
                     var imagesCount = images.length;
                     var containerID = 'imggalleryswp' + lightboxesCounter;
-                    var html = '<div id="' + containerID + '" style="width:100%;height:100%;position:fixed;top:0;left:0;">';
+                    var html = '<div id="' + containerID + '" style="width:100%;height:100%;position:fixed;top:0;left:0;user-select:none;">';
 
                     html += '<div style="position:absolute;top:0;left:0;width:100%;height:100%;">';
                     for (var i = 0; i < imagesCount; i++) {
@@ -75,7 +78,6 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
                         }
 
                         var currentSlideIndex = indexToShow;
-                        var imagesSlideAPI = [];
                         var imagesZoomAPI = [];
 
                         var slidesElements = slidesContainer.childNodes;
@@ -186,48 +188,53 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
                                     imageElement.style.setProperty('pointer-events', 'none'); // prevent drag
                                 }
 
-                                imagesZoomAPI[index] = ivoPetkov.bearFrameworkAddons.imageGalleryImageZoom.addZoom(slideContainer.firstChild, slideContainer);
-                                imagesSlideAPI[index] = ivoPetkov.bearFrameworkAddons.imageGalleryImageZoom.addSwipe(slideContainer);
+                                imagesZoomAPI[index] = imageGalleryImageZoom.addZoom(
+                                    slideContainer.firstChild,
+                                    slideContainer,
+                                    function () {
+                                        loadOriginalImage(index);
+                                        setTimeout(function () {
+                                            checkHasZoom(index);
+                                        }, 50);
+                                    },
+                                    function () {
+                                        checkHasZoom(index);
+                                    }
+                                );
 
-                                imagesSlideAPI[index].addEventListener('change', function (e) {
-                                    if (imagesZoomAPI[index].hasZoom()) {
-                                        return;
-                                    }
-                                    if (imagesCount < 2) {
-                                        return;
-                                    }
-                                    var changeValue = e.changeX + 'px';
-                                    setSlideSwipe(index - 1, changeValue, false);
-                                    setSlideSwipe(index, changeValue, false);
-                                    setSlideSwipe(index + 1, changeValue, false);
-                                });
-                                imagesSlideAPI[index].addEventListener('end', function (e) {
-                                    if (imagesZoomAPI[index].hasZoom()) {
-                                        return;
-                                    }
-                                    if (imagesCount < 2) {
-                                        return;
-                                    }
-                                    var changeX = e.changeX;
-                                    if (Math.abs(changeX) > 40) { // swipe
-                                        if (showSlide(changeX > 0 ? currentSlideIndex - 1 : currentSlideIndex + 1)) {
+                                imageGalleryImageZoom.addSwipe(
+                                    slideContainer,
+                                    function (e) {
+                                        if (imagesZoomAPI[index].hasZoom()) {
                                             return;
                                         }
+                                        if (imagesCount <= 1) {
+                                            return;
+                                        }
+                                        var changeValue = e.changeX + 'px';
+                                        setSlideSwipe(index - 1, changeValue, false);
+                                        setSlideSwipe(index, changeValue, false);
+                                        setSlideSwipe(index + 1, changeValue, false);
+                                    },
+                                    function (e) {
+                                        if (imagesZoomAPI[index].hasZoom()) {
+                                            return;
+                                        }
+                                        if (imagesCount <= 1) {
+                                            return;
+                                        }
+                                        var changeX = e.changeX;
+                                        if (Math.abs(changeX) > 40) { // swipe
+                                            if (showSlide(changeX > 0 ? currentSlideIndex - 1 : currentSlideIndex + 1)) {
+                                                return;
+                                            }
+                                        }
+                                        setSlideSwipe(index - 1, '0px', true);
+                                        setSlideSwipe(index, '0px', true);
+                                        setSlideSwipe(index + 1, '0px', true);
                                     }
-                                    setSlideSwipe(index - 1, '0px', true);
-                                    setSlideSwipe(index, '0px', true);
-                                    setSlideSwipe(index + 1, '0px', true);
-                                });
+                                );
 
-                                imagesZoomAPI[index].addEventListener('start', function () {
-                                    loadOriginalImage(index);
-                                    setTimeout(function () {
-                                        checkHasZoom(index);
-                                    }, 50);
-                                });
-                                imagesZoomAPI[index].addEventListener('end', function () {
-                                    checkHasZoom(index);
-                                });
                             })(i);
                         }
 
@@ -247,7 +254,7 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
                             var showZoomButtons = getAvailableZoomScale(currentSlideIndex) > 1;
                             var imageHasZoom = imageZoomAPI.hasZoom();
                             zoomInButton.style.display = showZoomButtons && !imageHasZoom ? 'block' : 'none';
-                            zoomOutButton.style.display = showZoomButtons && imageHasZoom ? 'block' : 'none';
+                            zoomOutButton.style.display = imageHasZoom ? 'block' : 'none';
                             //var hasDownloadButton = getDownloadURL(currentSlideIndex);
                             //downloadButton.style.display = hasDownloadButton ? 'block' : 'none';
                         };
