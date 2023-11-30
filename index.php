@@ -104,5 +104,5 @@ $app->clientPackages
         $package->embedPackage('touchEvents');
         //$package->addJSCode(file_get_contents($context->dir . '/dev/imageGalleryImageZoom.js'));
         $package->get = 'return ivoPetkov.bearFrameworkAddons.imageGalleryImageZoom;';
-        $package->addJSFile($context->assets->getURL('assets/imageGalleryImageZoom.min.js', ['cacheMaxAge' => 999999999, 'version' => 6]));
+        $package->addJSFile($context->assets->getURL('assets/imageGalleryImageZoom.min.js', ['cacheMaxAge' => 999999999, 'version' => 7]));
     });

@@ -11,12 +11,12 @@ var ivoPetkov = ivoPetkov || {};
 ivoPetkov.bearFrameworkAddons = ivoPetkov.bearFrameworkAddons || {};
 ivoPetkov.bearFrameworkAddons.imageGalleryImageZoom = ivoPetkov.bearFrameworkAddons.imageGalleryImageZoom || (function () {
 
-    var touchEvents = ivoPetkov.bearFrameworkAddons.touchEvents;
+    //var touchEvents = ivoPetkov.bearFrameworkAddons.touchEvents; // does not work for some reason
 
     var addZoom = function (element, container, onStart, onEnd) {
-        var zoomEventTarget = touchEvents.addZoom(element, container);
-        var doubleTapEventTarget = touchEvents.addDoubleTap(element);
-        var moveEventTarget = touchEvents.addMove(element, container);
+        var zoomEventTarget = ivoPetkov.bearFrameworkAddons.touchEvents.addZoom(element, container);
+        var doubleTapEventTarget = ivoPetkov.bearFrameworkAddons.touchEvents.addDoubleTap(element);
+        var moveEventTarget = ivoPetkov.bearFrameworkAddons.touchEvents.addMove(element, container);
 
         element.style.setProperty('transform', 'scale(var(--touch-events-zoom-scale)) translate(var(--touch-events-move-x),var(--touch-events-move-y))');
 
@@ -124,7 +124,7 @@ ivoPetkov.bearFrameworkAddons.imageGalleryImageZoom = ivoPetkov.bearFrameworkAdd
     };
 
     var addSwipe = function (element, onChange, onEnd) {
-        var swipeEventTarget = touchEvents.addSwipe(element);
+        var swipeEventTarget = ivoPetkov.bearFrameworkAddons.touchEvents.addSwipe(element);
         swipeEventTarget.addEventListener('change', onChange);
         swipeEventTarget.addEventListener('end', onEnd);
     };
