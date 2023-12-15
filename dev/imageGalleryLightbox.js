@@ -72,6 +72,8 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
                         var slidesContainer = container.firstChild;
                         var buttonsContainer = container.childNodes[1];
 
+                        var slidesContainerWidth = slidesContainer.getBoundingClientRect().width;
+
                         for (var i = 0; i < imagesCount; i++) {
                             var image = images[i];
                             html5DOMDocument.insert(image[2], [slidesContainer.childNodes[i].firstChild]);
@@ -224,7 +226,7 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
                                             return;
                                         }
                                         var changeX = e.changeX;
-                                        if (Math.abs(changeX) > 40) { // swipe
+                                        if (Math.abs(changeX) > slidesContainerWidth * 0.1) { // swipe
                                             if (showSlide(changeX > 0 ? currentSlideIndex - 1 : currentSlideIndex + 1)) {
                                                 return;
                                             }
