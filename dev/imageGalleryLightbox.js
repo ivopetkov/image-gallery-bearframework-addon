@@ -99,23 +99,6 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
 
                         var updateButtons = null;
 
-                        var loadOriginalImage = function (index) {
-                            var imageContainer = getImageContainer(index);
-                            var imageElement = imageContainer.querySelector('[data-responsively-lazy]');
-                            if (imageElement !== null) {
-                                var attributeName = 'data-responsively-lazy-preferred-option';
-                                var currentValue = imageElement.getAttribute(attributeName);
-                                if (currentValue === null) {
-                                    imageElement.setAttribute(attributeName, '999999'); // the max available option
-                                    try {
-                                        responsivelyLazy.run();
-                                    } catch (e) {
-
-                                    }
-                                }
-                            }
-                        };
-
                         var previousChecks = [];
                         var checkHasZoom = function (index) {
                             if (typeof previousChecks[index] === 'undefined') {
@@ -151,6 +134,20 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
                             slideContainer.style.setProperty('--igi-position', value);
                         };
 
+                        var updateResponsivelyLazy = function (index) {
+                            try {
+                                var slideContainer = slidesElements[index];
+                                if (typeof slideContainer !== 'undefined') {
+                                    var imageElement = slideContainer.querySelector('[data-responsively-lazy]');
+                                    if (imageElement !== null) {
+                                        responsivelyLazy.run(imageElement, { ignoreThreshold: true });
+                                    }
+                                }
+                            } catch (e) {
+
+                            }
+                        };
+
                         var setSlideSwipe = function (index, value, animate) {
                             if (typeof images[index] === 'undefined') {
                                 return;
@@ -161,6 +158,7 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
                             var slideContainer = slidesElements[index];
                             slideContainer.style.setProperty('--igi-swipe', value);
                         };
+
 
                         var showSlide = function (index) {
                             if (typeof images[index] === 'undefined') {
@@ -173,6 +171,9 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
                             setSlideSwipe(index - 1, '0px', true);
                             setSlideSwipe(index, '0px', true);
                             setSlideSwipe(index + 1, '0px', true);
+                            updateResponsivelyLazy(index - 1);
+                            updateResponsivelyLazy(index);
+                            updateResponsivelyLazy(index + 1);
                             updateButtons();
                             return true;
                         };
@@ -194,12 +195,14 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
                                     slideContainer.firstChild,
                                     slideContainer,
                                     function () {
-                                        loadOriginalImage(index);
                                         setTimeout(function () {
                                             checkHasZoom(index);
                                         }, 50);
                                     },
                                     function () {
+                                        setTimeout(function () {
+                                            updateResponsivelyLazy(index);
+                                        }, 200 + 10);
                                         checkHasZoom(index);
                                     }
                                 );
@@ -289,6 +292,9 @@ ivoPetkov.bearFrameworkAddons.imageGalleryLightbox = ivoPetkov.bearFrameworkAddo
                         //     }
                         // });
 
+                        updateResponsivelyLazy(currentSlideIndex - 1);
+                        updateResponsivelyLazy(currentSlideIndex);
+                        updateResponsivelyLazy(currentSlideIndex + 1);
                         updateButtons();
 
                         document.body.addEventListener('keydown', function (e) {

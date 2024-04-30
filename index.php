@@ -52,7 +52,7 @@ $app->serverRequests
                     if (isset($file[3])) {
                         $imageAttributes .= $file[3];
                     }
-                    $html = '<component src="lazy-image" style="background-color:#000;" filename="' . htmlentities($filename) . '" file-width="' . $imageWidth . '" file-height="' . $imageHeight . '" max-asset-width="' . $maxImageSize . '" max-asset-height="' . $maxImageSize . '"' . $imageAttributes . '/>';
+                    $html = '<component src="lazy-image" style="background-color:#000;" filename="' . htmlentities($filename) . '" file-width="' . $imageWidth . '" file-height="' . $imageHeight . '" max-asset-width="' . $maxImageSize . '" max-asset-height="' . $maxImageSize . '" lazy-threshold="0px"' . $imageAttributes . '/>';
                     $html = $app->components->process($html);
                     $html = $app->clientPackages->process($html);
                     //$downloadURL = $app->assets->getURL($filename, ['download' => true]);
@@ -81,7 +81,7 @@ $app->serverRequests
 $app->clientPackages
     ->add('-ivopetkov-image-gallery-lightbox', function (IvoPetkov\BearFrameworkAddons\ClientPackage $package) use ($context) {
         //$package->addJSCode(file_get_contents($context->dir . '/dev/imageGalleryLightbox.js'));
-        $package->addJSFile($context->assets->getURL('assets/imageGalleryLightbox.min.js', ['cacheMaxAge' => 999999999, 'version' => 14]));
+        $package->addJSFile($context->assets->getURL('assets/imageGalleryLightbox.min.js', ['cacheMaxAge' => 999999999, 'version' => 15]));
         $package->get = 'return ivoPetkov.bearFrameworkAddons.imageGalleryLightbox;';
 
         $nextButtonIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M10 6l6 6-6 6"/></svg>';
