@@ -63,7 +63,7 @@ if ($spacing === '') {
 
 $lazyLoad = $component->getAttribute('lazy-load') === 'true';
 
-$galleryID = 'imggallery' . uniqid();
+$galleryID = 'ipimgglr' . substr(base_convert(md5(uniqid()), 16, 36), 0, 6);
 $containerAttributes = '';
 
 if ($onClick === 'fullscreen') {
