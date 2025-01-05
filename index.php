@@ -79,7 +79,7 @@ $app->serverRequests
     });
 
 $app->clientPackages
-    ->add('-ivopetkov-image-gallery-lightbox', function (IvoPetkov\BearFrameworkAddons\ClientPackage $package) use ($context) {
+    ->add('-ivopetkov-image-gallery-lightbox', function (IvoPetkov\BearFrameworkAddons\ClientPackage $package) use ($context): void {
         //$package->addJSCode(file_get_contents($context->dir . '/dev/imageGalleryLightbox.js'));
         $package->addJSFile($context->assets->getURL('assets/imageGalleryLightbox.min.js', ['cacheMaxAge' => 999999999, 'version' => 15]));
         $package->get = 'return ivoPetkov.bearFrameworkAddons.imageGalleryLightbox;';
@@ -99,7 +99,7 @@ $app->clientPackages
 
         $package->addCSSCode($css);
     })
-    ->add('-ivopetkov-image-gallery-lightbox-requirements', function (IvoPetkov\BearFrameworkAddons\ClientPackage $package) use ($context) {
+    ->add('-ivopetkov-image-gallery-lightbox-requirements', function (IvoPetkov\BearFrameworkAddons\ClientPackage $package) use ($context): void {
         $package->embedPackage('html5DOMDocument');
         $package->embedPackage('touchEvents');
         //$package->addJSCode(file_get_contents($context->dir . '/dev/imageGalleryImageZoom.js'));

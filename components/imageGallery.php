@@ -79,7 +79,7 @@ if ($type === 'columns') {
     if (is_numeric($columnsCount) && ((int)$columnsCount >= 1 && (int)$columnsCount <= 20)) {
         $columnsCount = (int)$columnsCount;
     } else if ($columnsCount === 'match') {
-        $columnsCount = sizeof($files);
+        $columnsCount = count($files);
     } else {
         $columnsCount = 'auto';
     }
@@ -158,7 +158,7 @@ if ($type === 'columns') {
         foreach ($filesOnRow as $index => $fileData) {
             $totalWidth += $fileData[0];
         }
-        $filesOnRowCount = sizeof($filesOnRow);
+        $filesOnRowCount = count($filesOnRow);
         $allFilesWidthFormulas = [];
         if ($filesOnRowCount > 1) { // Move the previous to last, last.
             $lastIndex = null;
