@@ -293,7 +293,12 @@ $supportedAssetOptionsAttributes = [
     'cacheMaxAge' => ['asset-cache-max-age', 'int'],
     'quality' => ['asset-quality', 'int'],
     'svgFill' => ['asset-svg-fill', 'string'],
-    'svgStroke' => ['asset-svg-stroke', 'string']
+    'svgStroke' => ['asset-svg-stroke', 'string'],
+    'rotate' => ['asset-rotate', 'int'],
+    'cropX' => ['asset-crop-x', 'int'],
+    'cropY' => ['asset-crop-y', 'int'],
+    'cropWidth' => ['asset-crop-width', 'int'],
+    'cropHeight' => ['asset-crop-height', 'int'],
 ];
 
 echo '<html>';
