@@ -42,7 +42,6 @@ $app->serverRequests
                 if ($imageLoadingBackground !== '') {
                     $sharedImageAttributes .= ' loading-background="' . htmlentities($imageLoadingBackground) . '"';
                 }
-
                 foreach ($files as $file) {
                     $filename = $file[0];
                     $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
@@ -55,18 +54,43 @@ $app->serverRequests
                     $html = '<component src="lazy-image" style="background-color:#000;" filename="' . htmlentities($filename) . '" file-width="' . $imageWidth . '" file-height="' . $imageHeight . '" max-asset-width="' . $maxImageSize . '" max-asset-height="' . $maxImageSize . '" lazy-threshold="0px"' . $imageAttributes . '/>';
                     $html = $app->components->process($html);
                     $html = $app->clientPackages->process($html);
+
+                    $assetCropWidth = null;
+                    if (preg_match('/asset-crop-width="([^"]*)"/', $imageAttributes, $matches)) {
+                        $assetCropWidth = (int)$matches[1];
+                    }
+                    $assetCropHeight = null;
+                    if (preg_match('/asset-crop-height="([^"]*)"/', $imageAttributes, $matches)) {
+                        $assetCropHeight = (int)$matches[1];
+                    }
+                    $assetRotate = null;
+                    if (preg_match('/asset-rotate="([^"]*)"/', $imageAttributes, $matches)) {
+                        $assetRotate = (int)$matches[1];
+                    }
+                    if ($assetCropWidth !== null && $assetCropHeight !== null) {
+                        $resultWidth = $assetCropWidth;
+                        $resultHeight = $assetCropHeight;
+                    } else if ($assetRotate !== null && array_search($assetRotate, [90, 270]) !== false) {
+                        $temp = $imageWidth;
+                        $resultWidth = $imageHeight;
+                        $resultHeight = $temp;
+                    }else{
+                        $resultWidth = $imageWidth;
+                        $resultHeight = $imageHeight;
+                    }
+
                     //$downloadURL = $app->assets->getURL($filename, ['download' => true]);
                     if ($extension === 'svg') {
-                        if ($imageWidth > $imageHeight) {
+                        if ($resultWidth > $resultHeight) {
                             $maxWidth = $maxImageSize;
-                            $maxHeight = floor($imageHeight / $imageWidth * $maxImageSize);
+                            $maxHeight = floor($resultHeight / $resultWidth * $maxImageSize);
                         } else {
                             $maxHeight = $maxImageSize;
-                            $maxWidth = floor($imageWidth / $imageHeight * $maxImageSize);
+                            $maxWidth = floor($resultWidth / $resultHeight * $maxImageSize);
                         }
                         $result[] = [$maxWidth, $maxHeight, $html];
                     } else {
-                        $result[] = [$imageWidth, $imageHeight, $html];
+                        $result[] = [$resultWidth, $resultHeight, $html];
                     }
                 }
 
