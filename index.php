@@ -20,7 +20,7 @@ $app->components
 
 $app->serverRequests
     ->add('-ivopetkov-image-gallery-get-images', function ($data) use ($app) {
-        if (isset($data['serverData'])) {
+        if (isset($data['serverData']) && is_string($data['serverData'])) {
             $serverData = $data['serverData'];
             $encryptedServerDataHash = substr($serverData, 0, 32);
             try {
@@ -74,7 +74,7 @@ $app->serverRequests
                         $temp = $imageWidth;
                         $resultWidth = $imageHeight;
                         $resultHeight = $temp;
-                    }else{
+                    } else {
                         $resultWidth = $imageWidth;
                         $resultHeight = $imageHeight;
                     }
