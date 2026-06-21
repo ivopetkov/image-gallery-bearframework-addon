@@ -7,25 +7,48 @@
  */
 
 use BearFramework\App;
-use IvoPetkov\HTML5DOMDocument;
 
 $app = App::get();
 $context = $app->contexts->get(__DIR__);
 
 $hasLightbox = false;
 $hasResponsiveAttributes = false;
-$hasElementID = false;
 $internalOptionRenderContainer = $component->getAttribute('internal-option-render-container') !== 'false';
 $internalOptionRenderImageContainer = $component->getAttribute('internal-option-render-image-container') !== 'false';
 
 $files = [];
-$domDocument = new HTML5DOMDocument();
-$domDocument->loadHTML($component->innerHTML, HTML5DOMDocument::ALLOW_DUPLICATE_IDS);
-$fileElements = $domDocument->querySelectorAll('file');
-foreach ($fileElements as $index => $fileElement) {
-    $filename = (string) $fileElement->getAttribute('filename');
-    $fileWidth = (string) $fileElement->getAttribute('file-width');
-    $fileHeight = (string) $fileElement->getAttribute('file-height');
+
+$parseTags = function (string $html, string $tagName) {
+    $parseAttributes = function (string $attributesString): array {
+        $attributes = [];
+        preg_match_all(
+            '~([a-zA-Z0-9_-]+)\s*=\s*(["\'])(.*?)\2~s',
+            $attributesString,
+            $matches,
+            PREG_SET_ORDER
+        );
+        foreach ($matches as $match) {
+            $attributes[$match[1]] = html_entity_decode(
+                $match[3],
+                ENT_QUOTES | ENT_HTML5,
+                'UTF-8'
+            );
+        }
+        return $attributes;
+    };
+    preg_match_all("~<{$tagName}\b([^>]*)>~", $html, $tags, PREG_SET_ORDER);
+    $result = [];
+    foreach ($tags as $tag) {
+        $result[] = $parseAttributes($tag[1]);
+    }
+    return $result;
+};
+$fileElements = $parseTags((string)$component->innerHTML, 'file');
+
+foreach ($fileElements as $fileAttributes) {
+    $filename = isset($fileAttributes['filename']) ? (string) $fileAttributes['filename'] : '';
+    $fileWidth = isset($fileAttributes['file-width']) ? (string) $fileAttributes['file-width'] : '';
+    $fileHeight = isset($fileAttributes['file-height']) ? (string) $fileAttributes['file-height'] : '';
     if ($fileWidth === '' || $fileHeight === '') {
         $details = $app->assets->getDetails($filename, ['width', 'height']);
         $fileWidth = $details['width'] !== null ? $details['width'] : null;
@@ -37,7 +60,7 @@ foreach ($fileElements as $index => $fileElement) {
         'filename' => $filename,
         'width' => $fileWidth > 0 ? $fileWidth : 1,
         'height' => $fileHeight > 0 ? $fileHeight : 1,
-        'element' => $fileElement
+        'attributes' => $fileAttributes
     ];
 }
 
@@ -94,23 +117,21 @@ if ($type === 'columns') {
         $imageAspectRatio = null;
     }
 
-    $getColumnsStyle = function ($columnsCount, $attributeSelector = '') use ($galleryID, $spacing) {
-        $result = '#' . $galleryID . $attributeSelector . '>div{vertical-align:top;display:inline-block;width:calc((100% - ' . $spacing . '*' . ($columnsCount - 1) . ')/' . $columnsCount . ');margin-right:' . $spacing . ';margin-top:' . $spacing . ';}';
-        $result .= '#' . $galleryID . $attributeSelector . '>div:nth-child(' . $columnsCount . 'n){margin-right:0;width:calc((100% - ' . $spacing . '*' . ($columnsCount - 1) . ')/' . $columnsCount . ' - 0.99px);}'; // 0.99px is fix so there is no overflow
+    $getColumnsStyle = function ($columnsCount, $attributeSelector = '') use ($spacing) {
+        $result = '.CLASS_TO_REPLACE' . $attributeSelector . '>div{vertical-align:top;display:inline-block;width:calc((100% - ' . $spacing . '*' . ($columnsCount - 1) . ')/' . $columnsCount . ');margin-right:' . $spacing . ';margin-top:' . $spacing . ';}';
+        $result .= '.CLASS_TO_REPLACE' . $attributeSelector . '>div:nth-child(' . $columnsCount . 'n){margin-right:0;width:calc((100% - ' . $spacing . '*' . ($columnsCount - 1) . ')/' . $columnsCount . ' - 0.99px);}'; // 0.99px is fix so there is no overflow
         for ($i = 1; $i <= $columnsCount; $i++) {
-            $result .= '#' . $galleryID . $attributeSelector . '>div:nth-child(' . $i . '){margin-top:0;}';
+            $result .= '.CLASS_TO_REPLACE' . $attributeSelector . '>div:nth-child(' . $i . '){margin-top:0;}';
         }
         return $result;
     };
 
     if (is_numeric($columnsCount)) { // Fixed columns count
-        $containerStyle .= $getColumnsStyle($columnsCount);
         if ($columnsCount > 1) {
-            $hasElementID = true;
+            $containerStyle .= $getColumnsStyle($columnsCount);
         }
     } else { // Auto columns count
         $hasResponsiveAttributes = true;
-        $hasElementID = true;
         $imageWidthMultipliers = [
             'tiny' => 1,
             'small' => 2,
@@ -134,8 +155,8 @@ if ($type === 'columns') {
     }
 } elseif ($type === 'grid') {
 
-    $containerStyle .= '#' . $galleryID . '{opacity:0;}';
-    $containerStyle .= '#' . $galleryID . '[data-grid]{opacity:1;}';
+    $containerStyle .= '.CLASS_TO_REPLACE{opacity:0;}';
+    $containerStyle .= '.CLASS_TO_REPLACE[data-grid]{opacity:1;}';
 
     $maxHeights = [
         'tiny' => 90,
@@ -151,9 +172,8 @@ if ($type === 'columns') {
     $maxHeight = $maxHeights[$imageSize];
 
     $hasResponsiveAttributes = true;
-    $hasElementID = true;
 
-    $addFilesToRow = function ($attributeSelector, $filesOnRow, $isLastRow) use ($galleryID, &$containerStyle, $spacing) {
+    $addFilesToRow = function ($attributeSelector, $filesOnRow, $isLastRow) use (&$containerStyle, $spacing) {
         $totalWidth = 0;
         foreach ($filesOnRow as $index => $fileData) {
             $totalWidth += $fileData[0];
@@ -197,7 +217,7 @@ if ($type === 'columns') {
             if (!$isLastRow) {
                 $style .= 'margin-bottom:' . $spacing . ';';
             }
-            $containerStyle .= '#' . $galleryID . $attributeSelector . '>div:nth-child(' . ($index + 1) . '){' . $style . '}';
+            $containerStyle .= '.CLASS_TO_REPLACE' . $attributeSelector . '>div:nth-child(' . ($index + 1) . '){' . $style . '}';
         }
         return $widthFormula . '/' . $width;
     };
@@ -257,9 +277,8 @@ if ($type === 'columns') {
     $responsiveAttributes[] = 'w>=' . $maxGridImageWidth . '=>data-grid=' . $maxGridImageWidth;
     $containerAttributes .= ' data-responsive-attributes="' . implode(',', $responsiveAttributes) . '"';
 } elseif ($type === 'firstBig') {
-    $hasElementID = true;
     $hasResponsiveAttributes = true;
-    $containerStyle .= '#' . $galleryID . '>div:first-child{display:block;width:100%;}';
+    $containerStyle .= '.CLASS_TO_REPLACE>div:first-child{display:block;width:100%;}';
 
     $responsiveAttributes = [];
     $responsiveAttributes[] = 'w<' . (100) . '=>data-columns=1';
@@ -272,21 +291,19 @@ if ($type === 'columns') {
 
     for ($columnsCount = 1; $columnsCount <= 6; $columnsCount++) {
         $attributeSelector = '[data-columns="' . $columnsCount . '"]';
-        $containerStyle .= '#' . $galleryID . $attributeSelector . '>div:not(:first-child){display:inline-block;width:calc((100% - ' . $spacing . '/2*' . ($columnsCount - 1) . ')/' . $columnsCount . ');margin-right:calc(' . $spacing . '/2);margin-top:calc(' . $spacing . '/2);}';
-        $containerStyle .= '#' . $galleryID . $attributeSelector . '>div:nth-child(' . $columnsCount . 'n + 1){margin-right:0;}';
+        $containerStyle .= '.CLASS_TO_REPLACE' . $attributeSelector . '>div:not(:first-child){display:inline-block;width:calc((100% - ' . $spacing . '/2*' . ($columnsCount - 1) . ')/' . $columnsCount . ');margin-right:calc(' . $spacing . '/2);margin-top:calc(' . $spacing . '/2);}';
+        $containerStyle .= '.CLASS_TO_REPLACE' . $attributeSelector . '>div:nth-child(' . $columnsCount . 'n + 1){margin-right:0;}';
         for ($i = 1; $i <= $columnsCount; $i++) {
-            $containerStyle .= '#' . $galleryID . $attributeSelector . '>div:nth-child(' . $i . ' + 1){margin-top:0;}';
+            $containerStyle .= '.CLASS_TO_REPLACE' . $attributeSelector . '>div:nth-child(' . $i . ' + 1){margin-top:0;}';
         }
     }
 }
 
-if ($hasElementID) {
-    $containerAttributes .= ' id="' . htmlentities($galleryID) . '"';
-}
+$containerClassNames = [];
 
 $class = (string) $component->getAttribute('class');
 if (isset($class[0])) {
-    $containerAttributes .= ' class="' . htmlentities($class) . '"';
+    $containerClassNames[] = $class;
 }
 
 $supportedAssetOptionsAttributes = [
@@ -310,10 +327,18 @@ if ($hasLightbox) {
 if ($hasResponsiveAttributes) {
     echo '<link rel="client-packages-embed" name="responsiveAttributes">';
 }
+
 if (isset($containerStyle[0])) {
+    $containerClassName = 'ipimgglrstl' . md5($containerStyle);
+    $containerStyle = str_replace('CLASS_TO_REPLACE', $containerClassName, $containerStyle);
     echo '<style>' . $containerStyle . '</style>';
+    $containerClassNames[] = $containerClassName;
 }
 echo '</head>';
+
+if (isset($containerClassNames[0])) {
+    $containerAttributes .= ' class="' . htmlentities(implode(' ', $containerClassNames)) . '"';
+}
 
 echo '<body>';
 if ($internalOptionRenderContainer) {
@@ -330,12 +355,12 @@ if ($hasLightbox) {
 
 foreach ($files as $index => $file) {
     $filename = $file['filename'];
-    $fileElement = $file['element'];
-    $class = (string) $fileElement->getAttribute('class');
+    $fileAttributes = $file['attributes'];
+    $class = isset($fileAttributes['class']) ? (string) $fileAttributes['class'] : '';
     $classAttribute = isset($class[0]) ? ' class="' . htmlentities($class) . '"' : '';
-    $alt = (string) $fileElement->getAttribute('alt');
+    $alt = isset($fileAttributes['alt']) ? (string) $fileAttributes['alt'] : '';
     $altAttribute = isset($alt[0]) ? ' alt="' . htmlentities($alt) . '"' : '';
-    $title = (string) $fileElement->getAttribute('title');
+    $title = isset($fileAttributes['title']) ? (string) $fileAttributes['title'] : '';
     $titleAttribute = isset($title[0]) ? ' title="' . htmlentities($title) . '"' : '';
     if ($lazyLoad || $hasLightbox) {
         $assetOptionsAsAttributes = '';
@@ -345,7 +370,7 @@ foreach ($files as $index => $file) {
     }
     foreach ($supportedAssetOptionsAttributes as $assetOptionName => $assetOptionAttributeData) {
         $assetOptionAttributeName = $assetOptionAttributeData[0];
-        $assetOptionAttributeValue = (string)$fileElement->getAttribute($assetOptionAttributeName);
+        $assetOptionAttributeValue = isset($fileAttributes[$assetOptionAttributeName]) ? (string) $fileAttributes[$assetOptionAttributeName] : '';
         if ($assetOptionAttributeValue !== '') {
             if ($lazyLoad) {
                 $assetOptionsAsAttributes .= ' ' . $assetOptionAttributeName . '="' . htmlentities($assetOptionAttributeValue) . '"';
@@ -364,13 +389,13 @@ foreach ($files as $index => $file) {
         echo '<div>';
     }
     if ($onClick === 'fullscreen') {
-        $imageOnClick = 'window.' . $galleryID . 'c(' . $index . ');';
+        $imageOnClick = $galleryID . 'c(' . $index . ');';
         echo '<a' . $titleAttribute . ' onclick="' . htmlentities($imageOnClick) . '" style="cursor:pointer;">';
     } elseif ($onClick === 'url') {
-        $url = (string) $fileElement->getAttribute('url');
+        $url = isset($fileAttributes['url']) ? (string) $fileAttributes['url'] : '';
         echo '<a' . $titleAttribute . ' href="' . (isset($url[0]) ? htmlentities($url) : '#') . '">';
     } elseif ($onClick === 'script') {
-        $onClickScript = (string) $fileElement->getAttribute('script');
+        $onClickScript = isset($fileAttributes['script']) ? (string) $fileAttributes['script'] : '';
         echo '<a' . $titleAttribute . ' onclick="' . htmlentities($onClickScript) . '" style="cursor:pointer;">';
     }
     $currentImageAspectRatio = $imageAspectRatio;
@@ -385,10 +410,10 @@ foreach ($files as $index => $file) {
         if ($imageLoadingBackground !== null) {
             $imageAttributes .= ' loading-background="' . htmlentities($imageLoadingBackground) . '"';
         }
-        $imageAttributes .= ' min-asset-width="' . $fileElement->getAttribute('min-asset-width') . '"';
-        $imageAttributes .= ' min-asset-height="' . $fileElement->getAttribute('min-asset-height') . '"';
-        $imageAttributes .= ' max-asset-width="' . $fileElement->getAttribute('max-asset-width') . '"';
-        $imageAttributes .= ' max-asset-height="' . $fileElement->getAttribute('max-asset-height') . '"';
+        $imageAttributes .= ' min-asset-width="' . isset($fileAttributes['min-asset-width']) ? (string) $fileAttributes['min-asset-width'] : '' . '"';
+        $imageAttributes .= ' min-asset-height="' . isset($fileAttributes['min-asset-height']) ? (string) $fileAttributes['min-asset-height'] : '' . '"';
+        $imageAttributes .= ' max-asset-width="' . isset($fileAttributes['max-asset-width']) ? (string) $fileAttributes['max-asset-width'] : '' . '"';
+        $imageAttributes .= ' max-asset-height="' . isset($fileAttributes['max-asset-height']) ? (string) $fileAttributes['max-asset-height'] : '' . '"';
         $imageAttributes .= ' file-width="' . $file['width'] . '"';
         $imageAttributes .= ' file-height="' . $file['height'] . '"';
         echo '<component src="lazy-image"' . $classAttribute . $altAttribute . $titleAttribute . ' filename="' . htmlentities($filename) . '"' . $imageAttributes . $assetOptionsAsAttributes . '/>';
@@ -429,7 +454,7 @@ if ($hasLightbox) {
     echo '<script>';
     $lightboxServerData = json_encode($lightboxServerData);
     $lightboxJsData = md5($lightboxServerData) . base64_encode($app->encryption->encrypt(gzcompress($lightboxServerData)));
-    echo 'window.' . $galleryID . 'c=function(i){clientPackages.get(\'lightbox\').then(function(lightbox){var c=lightbox.make({showCloseButton:false});clientPackages.get(\'-ivopetkov-image-gallery-lightbox\').then(function(l){l.open(c,' . json_encode($lightboxJsData) . ',i);})});};';
+    echo $galleryID . 'c=function(i){clientPackages.get(\'lightbox\').then(function(lightbox){var c=lightbox.make({showCloseButton:false});clientPackages.get(\'-ivopetkov-image-gallery-lightbox\').then(function(l){l.open(c,' . json_encode($lightboxJsData) . ',i);})});};';
     echo '</script>';
 }
 echo '</body>';
