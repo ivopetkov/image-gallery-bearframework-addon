@@ -410,10 +410,10 @@ foreach ($files as $index => $file) {
         if ($imageLoadingBackground !== null) {
             $imageAttributes .= ' loading-background="' . htmlentities($imageLoadingBackground) . '"';
         }
-        $imageAttributes .= ' min-asset-width="' . isset($fileAttributes['min-asset-width']) ? (string) $fileAttributes['min-asset-width'] : '' . '"';
-        $imageAttributes .= ' min-asset-height="' . isset($fileAttributes['min-asset-height']) ? (string) $fileAttributes['min-asset-height'] : '' . '"';
-        $imageAttributes .= ' max-asset-width="' . isset($fileAttributes['max-asset-width']) ? (string) $fileAttributes['max-asset-width'] : '' . '"';
-        $imageAttributes .= ' max-asset-height="' . isset($fileAttributes['max-asset-height']) ? (string) $fileAttributes['max-asset-height'] : '' . '"';
+        $imageAttributes .= ' min-asset-width="' . (isset($fileAttributes['min-asset-width']) ? (string) $fileAttributes['min-asset-width'] : '') . '"';
+        $imageAttributes .= ' min-asset-height="' . (isset($fileAttributes['min-asset-height']) ? (string) $fileAttributes['min-asset-height'] : '') . '"';
+        $imageAttributes .= ' max-asset-width="' . (isset($fileAttributes['max-asset-width']) ? (string) $fileAttributes['max-asset-width'] : '') . '"';
+        $imageAttributes .= ' max-asset-height="' . (isset($fileAttributes['max-asset-height']) ? (string) $fileAttributes['max-asset-height'] : '') . '"';
         $imageAttributes .= ' file-width="' . $file['width'] . '"';
         $imageAttributes .= ' file-height="' . $file['height'] . '"';
         echo '<component src="lazy-image"' . $classAttribute . $altAttribute . $titleAttribute . ' filename="' . htmlentities($filename) . '"' . $imageAttributes . $assetOptionsAsAttributes . '/>';
