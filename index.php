@@ -40,7 +40,7 @@ $app->serverRequests
                 $sharedImageAttributes = '';
                 $imageLoadingBackground = isset($encryptedServerData[2]) ? $encryptedServerData[2] : '';
                 if ($imageLoadingBackground !== '') {
-                    $sharedImageAttributes .= ' loading-background="' . htmlentities($imageLoadingBackground) . '"';
+                    $sharedImageAttributes .= ' loading-background="' . htmlentities((string)$imageLoadingBackground) . '"';
                 }
                 foreach ($files as $file) {
                     $filename = $file[0];
@@ -51,7 +51,7 @@ $app->serverRequests
                     if (isset($file[3])) {
                         $imageAttributes .= $file[3];
                     }
-                    $html = '<component src="lazy-image" style="background-color:#000;" filename="' . htmlentities($filename) . '" file-width="' . $imageWidth . '" file-height="' . $imageHeight . '" max-asset-width="' . $maxImageSize . '" max-asset-height="' . $maxImageSize . '" lazy-threshold="0px"' . $imageAttributes . '/>';
+                    $html = '<component src="lazy-image" style="background-color:#000;" filename="' . htmlentities((string)$filename) . '" file-width="' . htmlentities((string)$imageWidth) . '" file-height="' . htmlentities((string)$imageHeight) . '" max-asset-width="' . htmlentities((string)$maxImageSize) . '" max-asset-height="' . htmlentities((string)$maxImageSize) . '" lazy-threshold="0px"' . $imageAttributes . '/>';
                     $html = $app->components->process($html);
                     $html = $app->clientPackages->process($html);
 
